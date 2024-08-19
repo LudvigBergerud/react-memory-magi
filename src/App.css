@@ -1,0 +1,20 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Arima+Madurai:wght@400;700&display=swap');
+
+body {
+    min-height: 100vh;
+    min-width: 100vw;
+    background: linear-gradient(180deg, #202B8A 0%, #8AD4E6 100%);
+    font-family: 'Arima Madurai', cursive;
+    color: #000000;
+}
+
+input{
+    background-color: #F3F3F3;
+    border: 1px solid #000000;
+    border-radius: 12px;
+}
+
+input::placeholder {
+    color: #0000009b; 
+}

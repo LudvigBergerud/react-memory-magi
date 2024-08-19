@@ -3,8 +3,11 @@ import './App.css';
 
 function App() {
   return (
-    <h1> Welcome to Memory-Magi</h1>
-
+    <div>
+      <h1>Welcome to Memory-Magi</h1>
+      <input placeholder='welcome' />
+    </div>
+  
   );
 }
 
