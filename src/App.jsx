@@ -1,13 +1,24 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+
+import Home from "./pages/Home";
+import Navbar from "./components/Navbar";
+import NotFound from "./pages/NotFound";
 
 function App() {
   return (
-    <div>
-      <h1>Welcome to Memory-Magi</h1>
-      <input placeholder='welcome' />
-    </div>
-  
+    <>
+      <Router>
+        <Navbar></Navbar>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <footer></footer>
+      </Router>
+    </>
   );
 }
 
