@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import "../styles/Result.css";
 import star from "../assets/Mario-Star.png";
 
@@ -20,6 +21,9 @@ const sampleLeaderboard = [
 ];
 
 function Result() {
+  const location = useLocation();
+  const data = location.state?.data;
+
   const [leaderboard, setLeaderboard] = useState(sampleLeaderboard);
 
   useEffect(() => {
@@ -38,7 +42,7 @@ function Result() {
         <div className="result-box">
           <h1 className="result-title">MAGISK PRESTATION!</h1>
           <p className="result-time-text">
-            Du klarade det på tiden: [Insert Time here]
+            Du klarade det på tiden: {data ? JSON.stringify(data.time) : ""}
           </p>
           <p>Du slog personligt rekord! </p>
           <p>Du är nu på plats [] i världen!</p>

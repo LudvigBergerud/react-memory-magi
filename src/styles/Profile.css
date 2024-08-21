@@ -3,7 +3,8 @@
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: start;
+  padding-top: 10vh;
 }
 .profile-content {
   height: 50vh;
@@ -59,7 +60,10 @@
   flex-wrap: wrap;
   gap: 10px;
 }
-
+.achievements-box {
+  max-height: 50vh;
+  overflow: scroll;
+}
 .achievement-item {
   padding: 10px;
   background-color: #f0f0f0;
@@ -79,4 +83,27 @@
 
 .achievements-not-earned .achievement-item {
   background-color: #f8d7da;
+}
+.achievement-item {
+  position: relative;
+  display: inline-block;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.custom-tooltip {
+  position: absolute;
+  top: 50%; /* Adjust based on your preference */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 5px;
+  white-space: nowrap;
+  z-index: 1;
+  margin-top: 5px;
+  opacity: 0.9;
+  pointer-events: none;
+  overflow: visible;
 }
