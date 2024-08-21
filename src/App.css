@@ -8,7 +8,9 @@ body {
   color: #000000;
   padding-top: 7.5vh;
   margin: 0;
-  padding: 0;
+  padding-bottom: 0;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 input {
