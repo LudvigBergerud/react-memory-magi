@@ -1,82 +1,287 @@
-import React from "react";
+import React, { useState } from "react";
 import "../styles/Profile.css";
 
 //Seed data
 const achievements = [
-  { id: 1, name: "Stjärna", earned: true },
-  { id: 2, name: "Mästare", earned: true },
-  { id: 3, name: "Expert", earned: true },
-  { id: 4, name: "Novis", earned: true },
-  { id: 5, name: "Hjälte", earned: false },
-  { id: 6, name: "Arcane Magiker", earned: true },
-  { id: 7, name: "Guldletare", earned: false },
-  { id: 8, name: "Förtrollad Upptäckare", earned: false },
-  { id: 9, name: "Kunglig Blodlinje", earned: false },
-  { id: 10, name: "Profet", earned: false },
-  { id: 11, name: "Hjärnmagi", earned: true },
-  { id: 12, name: "Eldens Väktare", earned: false },
-  { id: 13, name: "Stridens General", earned: true },
-  { id: 14, name: "Mystiskt Geni", earned: false },
-  { id: 15, name: "Stormens Varelse", earned: false },
-  { id: 16, name: "Kosmisk Väktare", earned: true },
-  { id: 17, name: "Drakryttare", earned: false },
-  { id: 18, name: "Nattens Väktare", earned: false },
-  { id: 19, name: "Skuggornas Krigare", earned: false },
-  { id: 20, name: "Ljusalv", earned: false },
+  {
+    id: 1,
+    name: "Stjärna",
+    earned: true,
+    description: "Klarat alla nivåer i spelet med perfekt resultat.",
+    points: 100,
+  },
+  {
+    id: 2,
+    name: "Mästare",
+    earned: true,
+    description: "Avslutat spelet utan att göra några fel.",
+    points: 90,
+  },
+  {
+    id: 3,
+    name: "Expert",
+    earned: true,
+    description: "Slutfört spelet på svåraste svårighetsgraden.",
+    points: 80,
+  },
+  {
+    id: 4,
+    name: "Novis",
+    earned: true,
+    description: "Avklarat din första nivå i spelet.",
+    points: 20,
+  },
+  {
+    id: 5,
+    name: "Hjälte",
+    earned: false,
+    description: "Räddat en medspelare genom att lösa ett svårt pussel.",
+    points: 50,
+  },
+  {
+    id: 6,
+    name: "Arcane Magiker",
+    earned: true,
+    description:
+      "Använt specialförmågor för att lösa de svåraste utmaningarna.",
+    points: 70,
+  },
+  {
+    id: 7,
+    name: "Guldletare",
+    earned: false,
+    description: "Hittat alla gömda skatter i spelet.",
+    points: 60,
+  },
+  {
+    id: 8,
+    name: "Förtrollad Upptäckare",
+    earned: false,
+    description: "Upptäckt alla hemliga platser i spelet.",
+    points: 40,
+  },
+  {
+    id: 9,
+    name: "Kunglig Blodlinje",
+    earned: false,
+    description: "Slutfört en uppgift som endast de ädlaste kan hantera.",
+    points: 100,
+  },
+  {
+    id: 10,
+    name: "Profet",
+    earned: false,
+    description: "Förutsett och undvikit alla faror i spelet.",
+    points: 60,
+  },
+  {
+    id: 11,
+    name: "Hjärnmagi",
+    earned: true,
+    description: "Löst alla pussel genom att använda minne och logik.",
+    points: 85,
+  },
+  {
+    id: 12,
+    name: "Eldens Väktare",
+    earned: false,
+    description: "Skyddat de sista eldsflammorna från att slockna.",
+    points: 70,
+  },
+  {
+    id: 13,
+    name: "Stridens General",
+    earned: true,
+    description: "Vunnit alla strider i spelet utan att förlora en enda gång.",
+    points: 95,
+  },
+  {
+    id: 14,
+    name: "Mystiskt Geni",
+    earned: false,
+    description: "Löst de mest komplexa gåtorna utan hjälp.",
+    points: 100,
+  },
+  {
+    id: 15,
+    name: "Stormens Varelse",
+    earned: false,
+    description: "Överlevt en storm av utmaningar utan att bli besegrad.",
+    points: 80,
+  },
+  {
+    id: 16,
+    name: "Kosmisk Väktare",
+    earned: false,
+    description:
+      "Försvarat universumets jämvikt genom att klara alla svåra nivåer.",
+    points: 90,
+  },
+  {
+    id: 17,
+    name: "Drakryttare",
+    earned: false,
+    description: "Bemästrat konsten att tämja och rida på drakar.",
+    points: 85,
+  },
+  {
+    id: 18,
+    name: "Nattens Väktare",
+    earned: false,
+    description: "Vunnit en kamp mot nattens krafter.",
+    points: 75,
+  },
+  {
+    id: 19,
+    name: "Skuggornas Krigare",
+    earned: false,
+    description: "Besegrat fiender som gömmer sig i skuggorna.",
+    points: 65,
+  },
+  {
+    id: 20,
+    name: "Ljusalv",
+    earned: false,
+    description: "Använt ljusets kraft för att övervinna mörkrets utmaningar.",
+    points: 80,
+  },
 ];
 
 function Profile() {
   const earnedAchievements = achievements.filter((ach) => ach.earned);
   const unearnedAchievements = achievements.filter((ach) => !ach.earned);
 
+  const [visibleTooltip, setVisibleTooltip] = useState(null);
+  const [tooltipPosition, setTooltipPosition] = useState({});
+
+  const handleMouseEnter = (id, e) => {
+    const rect = e.target.getBoundingClientRect();
+    setTooltipPosition({
+      top: rect.top + window.scrollY + 20,
+      left: rect.left + window.scrollX + 20,
+    });
+    setVisibleTooltip(id);
+  };
+
+  const handleMouseLeave = () => {
+    setVisibleTooltip(null);
+  };
+
+  function getEarnedAchievementPoints() {
+    let points = 0;
+    earnedAchievements.map((ach) => (points += ach.points));
+    return points;
+  }
+
+  function getAllAchievementPoints() {
+    let points = 0;
+    achievements.map((ach) => (points += ach.points));
+    return points;
+  }
+
   return (
     <>
       <div className="profile-page">
         <div className="col-1"></div>
-        {/* <div className="profile-menu col-2">
-          <button className="btn-profile-overview btn btn-secondary">
-            Profil överblick
-          </button>
-          <button className="btn-profile-settings btn btn-secondary">
-            Profil inställningar
-          </button>
-          <button className="btn-achievements btn btn-secondary">
-            Medaljer
-          </button>
-        </div> */}
-
         <div className="profile-content col-10">
           <div className="profile-content-left">
             <h1>Profil nivå</h1>
             <h2>Du är nivå: [3]</h2>
             <h3>Poäng till nästa nivå: [420]</h3>
             <div className="achievements-section">
-              <h2>Medaljer</h2>
-              <div className="achievements-earned">
-                <h3>Dina medaljer</h3>
-                <div className="achievements-grid">
-                  {earnedAchievements.map((ach) => (
-                    <div key={ach.id} className="achievement-item">
-                      {ach.name}
-                    </div>
-                  ))}
+              <h2>
+                Medaljer
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="45"
+                  height="45"
+                  fill="currentColor"
+                  class="bi bi-award"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M9.669.864 8 0 6.331.864l-1.858.282-.842 1.68-1.337 1.32L2.6 6l-.306 1.854 1.337 1.32.842 1.68 1.858.282L8 12l1.669-.864 1.858-.282.842-1.68 1.337-1.32L13.4 6l.306-1.854-1.337-1.32-.842-1.68zm1.196 1.193.684 1.365 1.086 1.072L12.387 6l.248 1.506-1.086 1.072-.684 1.365-1.51.229L8 10.874l-1.355-.702-1.51-.229-.684-1.365-1.086-1.072L3.614 6l-.25-1.506 1.087-1.072.684-1.365 1.51-.229L8 1.126l1.356.702z" />
+                  <path d="M4 11.794V16l4-1 4 1v-4.206l-2.018.306L8 13.126 6.018 12.1z" />
+                </svg>{" "}
+                <span>
+                  Du har [{getEarnedAchievementPoints()}/
+                  {getAllAchievementPoints()}] poäng
+                </span>
+              </h2>
+
+              <div className="achievements-box">
+                <div className="achievements-earned">
+                  <h3>Dina medaljer</h3>
+                  <div className="achievements-grid">
+                    {earnedAchievements.map((achievement) => (
+                      <div
+                        key={achievement.id}
+                        className="achievement-item"
+                        onMouseEnter={(e) =>
+                          handleMouseEnter(achievement.id, e)
+                        }
+                        onMouseLeave={handleMouseLeave}
+                      >
+                        {achievement.name}
+                        {visibleTooltip === achievement.id && (
+                          <div
+                            className="custom-tooltip"
+                            style={{
+                              position: "fixed",
+                              top: tooltipPosition.top + 50,
+                              left: tooltipPosition.left,
+                            }}
+                          >
+                            {achievement.description}
+                            <br />
+                            <p className="mb-0">
+                              Värd {achievement.points} poäng
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <div className="achievements-not-earned">
-                <h3>Låsta Medaljer</h3>
-                <div className="achievements-grid">
-                  {unearnedAchievements.map((ach) => (
-                    <div key={ach.id} className="achievement-item">
-                      {ach.name}
-                    </div>
-                  ))}
+
+                <div className="achievements-not-earned mt-4">
+                  <h3>Låsta Medaljer</h3>
+                  <div className="achievements-grid">
+                    {unearnedAchievements.map((achievement) => (
+                      <div
+                        key={achievement.id}
+                        className="achievement-item"
+                        onMouseEnter={(e) =>
+                          handleMouseEnter(achievement.id, e)
+                        }
+                        onMouseLeave={handleMouseLeave}
+                      >
+                        {achievement.name}
+                        {visibleTooltip === achievement.id && (
+                          <div
+                            className="custom-tooltip"
+                            style={{
+                              position: "fixed",
+                              top: tooltipPosition.top + 50,
+                              left: tooltipPosition.left,
+                            }}
+                          >
+                            {achievement.description}
+                            <br />
+                            <p className="mb-0">
+                              Värd {achievement.points} poäng
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
           <div className="profile-content-right">
-            <h1>Profil detaljer</h1>
+            <h1 className="mb-5">Profil detaljer</h1>
 
             <div className="input-field-box">
               <div className="justify-space-between">
@@ -106,7 +311,7 @@ function Profile() {
 
               <div className="justify-space-between mt-2">
                 <label className="m-2 font-weight-bold">
-                  Bekräfta lösenord:{" "}
+                  Bekräfta lösenord:
                 </label>
                 <input type="password"></input>
               </div>
