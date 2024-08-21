@@ -9,8 +9,23 @@ import './Game.css'
 function Game() {
   const [items, setItems] = useState([]);
   const [flippedcards, setNewflipState] = useState({});
+  const [listOfFlippedCards, setList] = useState([]);
 
-  const handleFlip = (id) => {
+  let categoryId=3; //Denna behöver routas in beroende på vilket spel användare väljer
+  let difficulty ='Easy'; // Samma som ovan, routas in från quiz home page sidan, tillfällig variabel.
+
+const DifficultyEnum =
+{
+  Easy:2,
+  Medium:3,
+  Hard:4
+}
+console.log("svårighet " + DifficultyEnum[difficulty]);
+  const handleFlip = (id,index) => {
+console.log("kortid-:"+id)
+
+    setList([...listOfFlippedCards, id]);
+ 
 
     //kolla hur många kort som är flippade
     const flippedCardsCount = Object.keys(flippedcards).filter(
@@ -24,26 +39,45 @@ function Game() {
       //lägg till nytt kort som ska flippas
     setNewflipState((prev) => ({
       ...prev,
-      [id]: !prev[id]
+      [index]: !prev[index]
   
     }));
+    
+
   };
   
-    //Hämta alla korten från api
+    //Hämta korten från en specifik kategori
     useEffect(() => {
       fetch("https://localhost:7259/api/Item")
         .then((res) => res.json())
-        .then((data) => setItems(data));
+        .then(data =>{
+          //filtrera ut rätt kategori och kolla vilken svårighetgrad = antal kort
+            const filtereditems = data.filter(item => item.categoryId === categoryId).slice(0, DifficultyEnum[difficulty]);
+            //Duplicera listan då vi behöver ha 2 kort av varje för memory
+            const deepCopiedItems = filtereditems.map(item => JSON.parse(JSON.stringify(item)));
+            const doubledItems = [...filtereditems, ...deepCopiedItems];
+            //Shuffla listan
+            for (var i = doubledItems.length - 1; i > 0; i--) {
+              var j = Math.floor(Math.random() * (i + 1));
+              var temp = doubledItems[i];
+              doubledItems[i] = doubledItems[j];
+              doubledItems[j] = temp;
+            }
+            setItems(doubledItems);
+          })
+        
     }, []);
 
     //Denna är aktiv hela tiden och kollar hur många kort som är klickade just nu.
     useEffect(() => {
-      const flippedCardIds = Object.keys(flippedcards).filter(
-        (cardId) => flippedcards[cardId]
-      );
-  
-      if (flippedCardIds.length === 2 ) {
-        const [firstCard, secondCard] = flippedCardIds;
+      console.log(listOfFlippedCards);
+   
+
+
+      if (listOfFlippedCards.length === 2 ) {
+        const [firstCard, secondCard] = listOfFlippedCards
+      console.log("första:"+firstCard);  // 10
+console.log("andra"+secondCard);
 
         if (firstCard === secondCard) {
           console.log("Korten matchar");
@@ -52,6 +86,7 @@ function Game() {
           //resetta alla kort om det inte var en match
           setTimeout(() => {
             setNewflipState({});
+            setList([]);
           }, 2250);
         }
       }
@@ -60,14 +95,17 @@ function Game() {
 
   return (
     <div className="container">
+      <div className='justify-content center'>
+        <h1>klocka</h1>
+      </div>
   <div className="row" >
 
-  {items.map((item) => (
+  {items.map((item, index) => (
        <div className="col-sm-4"
        style={{  height: '30rem' }}
-       key={item.id}
-       onClick={() => handleFlip(item.id)}>
-        <div className={`card ${flippedcards[item.id]? 'cardFlip' : ''}`}>
+       key={index}
+       onClick={() => handleFlip(item.id, index)}>
+        <div className={`card ${flippedcards[index]? 'cardFlip' : ''}`}>
       <div className='back'>
                 <img src={cardFront} alt="" style={{ width: '20rem', height: 'auto' }} />
               </div>
