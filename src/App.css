@@ -1,12 +1,13 @@
-
-@import url('https://fonts.googleapis.com/css2?family=Arima+Madurai:wght@400;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Arima+Madurai:wght@400;700&display=swap");
 
 body {
-    min-height: 100vh;
-    min-width: 100vw;
-    background: linear-gradient(180deg, #202B8A 0%, #8AD4E6 100%);
-    font-family: 'Arima Madurai', cursive;
-    color: #000000;
+  min-height: 100vh;
+  min-width: 100vw;
+  background: linear-gradient(180deg, #202b8a 0%, #8ad4e6 100%);
+  font-family: "Arima Madurai", cursive;
+  color: #000000;
+  margin: 0;
+  padding: 0;
 }
 
 input{
@@ -49,3 +50,4 @@ button:hover {
     border-radius: 10px;
     border: 3px solid transparent;
 }
+
