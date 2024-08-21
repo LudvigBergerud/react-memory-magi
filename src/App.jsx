@@ -5,10 +5,11 @@ import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import Navbar from "./components/Navbar";
+import { AuthProvider } from "./contexts/AuthProvider";
 
 function App() {
   return (
-    <>
+    <AuthProvider>
       <Router>
         <Navbar></Navbar>
         <Routes>
@@ -18,7 +19,7 @@ function App() {
         </Routes>
         <footer></footer>
       </Router>
-    </>
+    </AuthProvider>
   );
 }
 
