@@ -16,13 +16,13 @@ function App() {
       <Router>
         <Navbar></Navbar>
         <Routes>
+          <Route path="/landingpage" element={<LandingPage />} />
           <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
           <Route path="/game" element={<Game />} />
           <Route path="/result" element={<Result />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<NotFound />} />
-          <Route path="/landingpage" element={<LandingPage />} />
         </Routes>
         <footer></footer>
       </Router>

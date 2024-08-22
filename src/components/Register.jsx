@@ -1,53 +1,45 @@
 import React, { useEffect, useState } from "react";
+import usePost from "../hooks/usePost";
+import { Link } from "react-router-dom";
+import { AuthContext } from "../contexts/AuthProvider";
 
 // hämta onRegister från LandingPage
-function RegisterNewUser({ onRegister }) {
-  const [username, setUsername] = useState("");
+function RegisterNewUser({ toggleModal }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const createNewUser = usePost();
 
-  const confirmNewUser = () => {
+  function Register() {
     const userData = {
-      username,
       email,
       password,
     };
 
-    if (username === "" && email === "" && password === "") {
+    if (email === "" && password === "") {
       console.log("Please enter information in these boxes");
+      console.log("Email måste innehålla '@'.");
+      console.log(
+        "Lösnord måste innehålla: ' Stor ' bokstav, ' M I N S T sex tecken ', samt en Special symbol: !''#¤%&"
+      );
+      // Gör någon banner senare för pop up eller ngt för dessa
     } else {
-      //RegisterNewUserFunction(username, email, password);
-      onRegister(userData);
+      // POST:a / skapa ny user till Db
+      createNewUser
+        .saveData("https://localhost:7259/register", userData, "POST")
+        .then((response) => {
+          if (response != "") {
+            toggleModal();
+          } else {
+            console.error("Registrering failed");
+          }
+        });
     }
-  };
-
-  //   function RegisterNewUserFunction(username, email, password) {
-  //     fetch("https://localhost:7259/api/Users/register", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         username: username.inputValue,
-  //         email: email.inputValue,
-  //         password: password.inputValue,
-  //       }),
-  //     }),
-  //       then((response) => response.json()).then((data) => {
-  //         console.log("New user has been registered:", data);
-  //       });
-  //   }
+  }
 
   return (
     <>
       <div className="modalComponent">
         <p>Registera era uppgifter</p>
-        <input
-          type="text"
-          placeholder="Användarnamn"
-          value={username}
-          onChange={(u) => setUsername(u.target.value)}
-        />
         <input
           type="text"
           placeholder="Email"
@@ -62,7 +54,7 @@ function RegisterNewUser({ onRegister }) {
         />
         <br />
         <br />
-        <button onClick={confirmNewUser}>Registrera</button>
+        <button onClick={Register}>Registrera</button>
       </div>
     </>
   );
