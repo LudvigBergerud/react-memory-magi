@@ -10,8 +10,8 @@ function Footer() {
         <p>© MemoryMagi AB, 2024</p>
       </div>
       <div id="footer-links-wrapper">
-        <NavLink to="#">Vanligt ställda frågor</NavLink>
-        <NavLink to="#">Om Oss</NavLink>
+        <NavLink to="/FAQ">Vanligt ställda frågor</NavLink>
+        <NavLink to="/aboutus">Om Oss</NavLink>
       </div>
     </div>
   );
