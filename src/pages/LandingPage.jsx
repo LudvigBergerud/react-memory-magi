@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import RegisterNewUser from "../components/Register";
 import { Link } from "react-router-dom";
 
@@ -20,8 +20,8 @@ function Landingpage() {
     setnewUser(createUser);
 
     console.log("Ny user: ", createUser);
-    toggleSignUpModal();
 
+    toggleSignUpModal();
     setModalVisible(false);
 
     // Spara till SQL - använd API.

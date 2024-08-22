@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // hämta onRegister från LandingPage
 function RegisterNewUser({ onRegister }) {
@@ -12,8 +12,31 @@ function RegisterNewUser({ onRegister }) {
       email,
       password,
     };
-    onRegister(userData);
+
+    if (username === "" && email === "" && password === "") {
+      console.log("Please enter information in these boxes");
+    } else {
+      //RegisterNewUserFunction(username, email, password);
+      onRegister(userData);
+    }
   };
+
+  //   function RegisterNewUserFunction(username, email, password) {
+  //     fetch("https://localhost:7259/api/Users/register", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         username: username.inputValue,
+  //         email: email.inputValue,
+  //         password: password.inputValue,
+  //       }),
+  //     }),
+  //       then((response) => response.json()).then((data) => {
+  //         console.log("New user has been registered:", data);
+  //       });
+  //   }
 
   return (
     <>
