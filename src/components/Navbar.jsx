@@ -13,22 +13,10 @@ function Navbar() {
   function handleLogOut() {
     postHandler.saveData("https://localhost:7259/logout", {}, "POST");
   }
-  //Outommented code to easily test login and logout at the same time.
-  //   function handleLogin() {
-  //     const user = { email: "user1@email.com", password: "passWord123!" };
-  //     postHandler.saveData("https://localhost:7259/login", user, "POST");
-  //   }
-
-  //   useEffect(() => {
-  //     if (postHandler.response.status === 200 && postHandler.data !== null) {
-  //       authHandler.signIn(postHandler.data.accessToken);
-  //     }
-  //   }, [postHandler.data]);
-
   useEffect(() => {
     if (postHandler.response.status === 200) {
       authHandler.signOut();
-      navigate("/");
+      navigate("/landingpage");
     }
   }, [postHandler.response]);
 
@@ -53,7 +41,9 @@ function Navbar() {
           </div>
         </div>
       ) : (
-        <>{/* <a onClick={handleLogin}>Log in</a> */}</>
+        <>
+          ""
+        </>
       )}
     </>
   );
