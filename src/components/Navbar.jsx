@@ -23,7 +23,7 @@ function Navbar() {
 
   return (
     <>
-      {authHandler.isAuthenticated === false ? (
+      {authHandler.isAuthenticated ? (
         <div id="nav-container">
           <div id="brand-wrapper">
             <NavLink to="Home">
