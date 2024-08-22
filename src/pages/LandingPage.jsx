@@ -1,16 +1,24 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import RegisterNewUser from "../components/Register";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import usePost from "../hooks/usePost";
+import { AuthContext } from "../contexts/AuthProvider";
 
 import "../styles/LandingPage.css";
 
 function Landingpage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+  const authHandler = useContext(AuthContext);
+  const loginHandler = usePost();
+  const user = { email, password }; // binda till Value
+
   // skap en toggle för Modal
   const [isModalVisible, setModalVisible] = useState(false);
 
   // spara username, email, password i en variabel / objekt
   const [newUser, setnewUser] = useState({
-    username: "",
     email: "",
     password: "",
   });
@@ -18,13 +26,9 @@ function Landingpage() {
   // Hämta objekt från RegisterNewUser component till createUser
   const confirmRegister = (createUser) => {
     setnewUser(createUser);
-
     console.log("Ny user: ", createUser);
     toggleSignUpModal();
-
     setModalVisible(false);
-
-    // Spara till SQL - använd API.
   };
 
   // om toggled = display, annars not
@@ -32,15 +36,25 @@ function Landingpage() {
     setModalVisible(!isModalVisible);
   };
 
-  function logInToGame() {
-    console.log("Logging into the game page");
+  const handleLogIn = () => {
+    console.log("Logg into game");
 
-    // Checka username, lösenord.
+    if (!email || !password) {
+      // Gör en pop up eller ngt senare om man skriver in fel email / password
+      console.log("Enter email and password");
+      return console.log("Fel!!!");
+    }
 
-    // Fetcha från API user info
+    loginHandler.saveData("https://localhost:7259/login", user, "POST");
+  };
 
-    // Linka till "/" om success.
-  }
+  // om lyckad == ge token och då syns navbar etc och skicka user till /home
+  useEffect(() => {
+    if (loginHandler.response.status === 200 && loginHandler.data !== null) {
+      authHandler.signIn(loginHandler.data.accessToken);
+      navigate("/home");
+    }
+  }, [loginHandler.data]);
 
   return (
     <>
@@ -48,15 +62,25 @@ function Landingpage() {
         <div>
           <h1>INSERT PICTURE HERE!</h1>
           <div className="centerInputs">
-            <input type="text" placeholder="Användarnamn" />
+            <input
+              type="text"
+              placeholder="E mail"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
             <br />
             <br />
-            <input type="password" placeholder="Lösenord" />
+            <input
+              type="password"
+              placeholder="Lösenord"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
             {/* Gör Register till en Component */}
             <br />
             <br />
             <button onClick={toggleSignUpModal}>Skapa konto</button>{" "}
-            <button onClick={logInToGame}>Logga in</button>
+            <button onClick={handleLogIn}>Logga in</button>
           </div>
         </div>
       </div>
@@ -66,7 +90,10 @@ function Landingpage() {
         <div className="modalOuter" onClick={toggleSignUpModal}>
           <div className="modalInner" onClick={(e) => e.stopPropagation()}>
             {/*Registera = Displaya info från Reg- comp */}
-            <RegisterNewUser onRegister={confirmRegister} />
+            <RegisterNewUser
+              toggleModal={toggleSignUpModal}
+              onRegister={confirmRegister}
+            />
             <button onClick={toggleSignUpModal}>X</button>{" "}
           </div>
         </div>
