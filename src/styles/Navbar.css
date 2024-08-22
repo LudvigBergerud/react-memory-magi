@@ -11,6 +11,7 @@
   color: #e5e5e5;
   padding-left: 0.5rem;
   padding-right: 0.5rem;
+  border-bottom: 1px solid #5580b8;
 }
 
 #navlinks-wrapper {
@@ -24,7 +25,7 @@
   justify-content: start;
 }
 
-a {
+#nav-container a {
   display: flex;
   align-items: center;
   text-indent: 5px;
@@ -35,6 +36,6 @@ a {
 #navlinks-wrapper a {
   margin: 1rem;
 }
-a:hover {
+#nav-container a:hover {
   color: #ff9033;
 }
