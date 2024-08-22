@@ -17,7 +17,7 @@ function Navbar() {
   useEffect(() => {
     if (postHandler.response.status === 200) {
       authHandler.signOut();
-      navigate("/");
+      navigate("/landingpage");
     }
   }, [postHandler.response]);
 

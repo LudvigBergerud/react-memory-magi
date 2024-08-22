@@ -1,5 +1,7 @@
 import "./App.css";
+
 import "bootstrap/dist/css/bootstrap.min.css";
+
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
@@ -19,15 +21,17 @@ function App() {
       <Router>
         <Navbar></Navbar>
         <Routes>
+          <Route path="/landingpage" element={<LandingPage />} />
           <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
           <Route path="/game" element={<Game />} />
           <Route path="/result" element={<Result />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<NotFound />} />
-          <Route path="/landingpage" element={<LandingPage />} />
+
           <Route path="/aboutus" element={<AboutUs />} />
           <Route path="/FAQ" element={<FAQ />} />
+
         </Routes>
         <Footer></Footer>
       </Router>
