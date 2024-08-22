@@ -13,9 +13,12 @@
 }
 #info-wrapper {
   display: grid;
-  grid-template-rows: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 25%);
   padding-right: 0.5rem;
-  /* text-align: center; */
+  overflow: auto;
+}
+#info-wrapper div {
+  overflow: auto;
 }
 #header-wrapper {
   display: flex;

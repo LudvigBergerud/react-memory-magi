@@ -19,6 +19,15 @@
   margin-bottom: 0;
 }
 
+#footer-container a {
+  display: flex;
+  align-items: center;
+  text-indent: 5px;
+  text-decoration: none;
+  color: #202b8a;
+  text-align: center;
+}
+
 #footer-links-wrapper {
   grid-column: 2;
   display: flex;
@@ -26,11 +35,7 @@
 }
 #footer-links-wrapper a {
   margin: 1rem;
-}
-
-#footer-container a {
-  color: #202b8a;
-  text-decoration: none;
+  text-indent: 3px;
 }
 
 #footer-container a:hover {
