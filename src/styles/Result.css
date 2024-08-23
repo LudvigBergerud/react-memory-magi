@@ -1,9 +1,10 @@
 .result-page {
   min-width: 100vw;
-  min-height: 100vh;
+  min-height: 85vh;
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: scroll;
 }
 .result-box {
   border: 2px solid rgb(128, 236, 231);

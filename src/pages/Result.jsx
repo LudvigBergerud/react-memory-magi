@@ -34,7 +34,7 @@ function Result() {
       return aMin * 60 + aSec - (bMin * 60 + bSec);
     });
     setLeaderboard(sortedLeaderboard);
-  }, [leaderboard]);
+  }, []);
 
   return (
     <>

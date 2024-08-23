@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "../styles/Profile.css";
 
 //Seed data
@@ -154,6 +154,49 @@ function Profile() {
   const [visibleTooltip, setVisibleTooltip] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({});
 
+  const [userName, setUserName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmitUsername = async (e) => {
+    e.preventDefault();
+    const accessToken = await JSON.parse(localStorage.getItem("accessToken"));
+
+    const responseUser = await fetch("https://localhost:7259/user", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        ...(accessToken !== null && { Authorization: `Bearer ${accessToken}` }),
+      },
+    });
+
+    if (responseUser.ok) {
+      const data = await responseUser.json();
+      const responseUpdate = await fetch(
+        "https://localhost:7259/api/Users/update-user",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: data.userId,
+            userName: userName,
+            email: email,
+          }),
+        }
+      );
+      if (responseUpdate.ok) {
+        console.log("Update username successful");
+      } else {
+        const error = await responseUpdate.json();
+        console.error("Update username failed:", error);
+      }
+    } else {
+      console.error("Failed getting user info: " + responseUser.error);
+    }
+  };
+
   const handleMouseEnter = (id, e) => {
     const rect = e.target.getBoundingClientRect();
     setTooltipPosition({
@@ -196,7 +239,7 @@ function Profile() {
                   width="45"
                   height="45"
                   fill="currentColor"
-                  class="bi bi-award"
+                  className="bi bi-award"
                   viewBox="0 0 16 16"
                 >
                   <path d="M9.669.864 8 0 6.331.864l-1.858.282-.842 1.68-1.337 1.32L2.6 6l-.306 1.854 1.337 1.32.842 1.68 1.858.282L8 12l1.669-.864 1.858-.282.842-1.68 1.337-1.32L13.4 6l.306-1.854-1.337-1.32-.842-1.68zm1.196 1.193.684 1.365 1.086 1.072L12.387 6l.248 1.506-1.086 1.072-.684 1.365-1.51.229L8 10.874l-1.355-.702-1.51-.229-.684-1.365-1.086-1.072L3.614 6l-.25-1.506 1.087-1.072.684-1.365 1.51-.229L8 1.126l1.356.702z" />
@@ -283,20 +326,35 @@ function Profile() {
           <div className="profile-content-right">
             <h1 className="mb-5">Profil detaljer</h1>
 
-            <div className="input-field-box">
+            <form onSubmit={handleSubmitUsername} className="input-field-box">
               <div className="justify-space-between">
                 <label className="m-2 font-weight-bold">Användarnamn: </label>
-                <input type="username"></input>
+                <input
+                  type="text"
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
+                  placeholder="Username"
+                  required
+                />
               </div>
-              <button className="w-100 mt-2 btn btn-info font-weight-bold">
+              <button
+                type="submit"
+                className="w-100 mt-2 btn btn-info font-weight-bold"
+              >
                 Ändra användarnamn
               </button>
-            </div>
+            </form>
 
             <div className="input-field-box">
               <div className="justify-space-between">
                 <label className="m-2 font-weight-bold">E-post: </label>
-                <input type="email"></input>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Email"
+                  required
+                />
               </div>
               <button className="w-100 mt-2 btn btn-info font-weight-bold">
                 Ändra E-post
@@ -305,6 +363,13 @@ function Profile() {
 
             <div className="input-field-box">
               <div className="justify-space-between">
+                <label className="m-2 font-weight-bold">
+                  Nuvarande lösenord:{" "}
+                </label>
+                <input type="password"></input>
+              </div>
+
+              <div className="justify-space-between mt-2">
                 <label className="m-2 font-weight-bold">Nytt lösenord: </label>
                 <input type="password"></input>
               </div>
