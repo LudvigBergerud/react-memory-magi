@@ -13,10 +13,6 @@ function Game() {
   const [listOfFlippedCards, setList] = useState([]);
   const [time, setTime] = useState(0);
 
-  let categoryId = 3; //Denna behöver routas in beroende på vilket spel användare väljer
-  let difficulty = "Easy"; // Samma som ovan, routas in från quiz home page sidan, tillfällig variabel.
-  let userId = "new_user_id"; //samma som ovan, tillfällig variabel
-
   let categoryId= gameData?.category.id; //Denna behöver routas in beroende på vilket spel användare väljer
   let difficulty =gameData?.difficultyLevel; // Samma som ovan, routas in från quiz home page sidan, tillfällig variabel.
   let userId ="new_user_id"; //samma som ovan, tillfällig variabel
