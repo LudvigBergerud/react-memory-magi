@@ -1,10 +1,13 @@
 import React, {useState,useEffect, useRef} from 'react'
+import { useLocation, Link } from 'react-router-dom';
 import cardback from '../assets/cardBack.png'
 import cardFront from '../assets/cardFront.png'
 import './Game.css'
 
 
 function Game() {
+  const location = useLocation();
+  const { gameData } = location.state || {};
   const [items, setItems] = useState([]);
   const [UserItems, setUserItems] = useState([]);
   const [flippedcards, setNewflipState] = useState({});
@@ -12,11 +15,12 @@ function Game() {
   const [time, setTime] = useState(0);
 
 
-  let categoryId=3; //Denna behöver routas in beroende på vilket spel användare väljer
-  let difficulty ='Easy'; // Samma som ovan, routas in från quiz home page sidan, tillfällig variabel.
+  let categoryId= gameData?.category.id; //Denna behöver routas in beroende på vilket spel användare väljer
+  let difficulty =gameData?.difficultyLevel; // Samma som ovan, routas in från quiz home page sidan, tillfällig variabel.
   let userId ="new_user_id"; //samma som ovan, tillfällig variabel
 
-
+console.log("Objekt från HOME:"+gameData + JSON.stringify(gameData));
+console.log(categoryId);
 const DifficultyEnum =
 {
   Easy:2,
@@ -119,11 +123,23 @@ console.log("andra"+secondCard);
 
   return (
     <div className="container">
-      <div className='text-center '>
-      <h1>{("0" + Math.floor((time / 60000) % 60)).slice(-2)}:
+       <div className='text-center'>
+          <h1>{gameData.category.name}</h1>
+        </div>
+      <div className='d-flex justify-content-between align-items-center'>
+      <div className="flex-grow-1 d-flex justify-content-center" >
+       
+      <h1 >{("0" + Math.floor((time / 60000) % 60)).slice(-2)}:
         {("0" + Math.floor((time / 1000) % 60)).slice(-2)}:
         {("0" + ((time / 10) % 100)).slice(-2)}</h1>
        
+      </div>
+      <div>
+    <Link to="/home" > 
+      <button className="btn btn-danger">Avbryt spel</button>
+      </Link>
+      </div>
+      
       </div>
   <div className="row" >
 
