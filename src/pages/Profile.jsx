@@ -160,18 +160,25 @@ function Profile() {
 
   const handleSubmitUsername = async (e) => {
     e.preventDefault();
-    const accessToken = await JSON.parse(localStorage.getItem("accessToken"));
+    const accessTokenString = localStorage.getItem("accessToken");
+    const accessToken = accessTokenString
+      ? JSON.parse(accessTokenString)
+      : null;
 
-    const responseUser = await fetch("https://localhost:7259/user", {
+    const responseUser = await fetch("https://localhost:7259/api/Users/user", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        ...(accessToken !== null && { Authorization: `Bearer ${accessToken}` }),
+        ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
       },
     });
 
     if (responseUser.ok) {
-      const data = await responseUser.json();
+      const data =
+        responseUser.headers.get("Content-Length") !== "0"
+          ? await responseUser.json()
+          : {};
+      console.log(data);
       const responseUpdate = await fetch(
         "https://localhost:7259/api/Users/update-user",
         {
@@ -189,11 +196,18 @@ function Profile() {
       if (responseUpdate.ok) {
         console.log("Update username successful");
       } else {
-        const error = await responseUpdate.json();
-        console.error("Update username failed:", error);
+        const error =
+          responseUpdate.headers.get("Content-Length") !== "0"
+            ? await responseUpdate.json()
+            : {};
+        console.error("Update username failed:", JSON.stringify(error));
       }
     } else {
-      console.error("Failed getting user info: " + responseUser.error);
+      const error =
+        responseUser.headers.get("Content-Length") !== "0"
+          ? await responseUser.json()
+          : {};
+      console.error("Failed getting user info: " + JSON.stringify(error));
     }
   };
 
@@ -345,7 +359,7 @@ function Profile() {
               </button>
             </form>
 
-            <div className="input-field-box">
+            <form className="input-field-box">
               <div className="justify-space-between">
                 <label className="m-2 font-weight-bold">E-post: </label>
                 <input
@@ -359,7 +373,7 @@ function Profile() {
               <button className="w-100 mt-2 btn btn-info font-weight-bold">
                 Ändra E-post
               </button>
-            </div>
+            </form>
 
             <div className="input-field-box">
               <div className="justify-space-between">
