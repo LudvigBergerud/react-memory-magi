@@ -156,45 +156,70 @@ function Profile() {
 
   const [userName, setUserName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [user, setUser] = useState(null);
 
-  const handleSubmitUsername = async (e) => {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const accessTokenString = localStorage.getItem("accessToken");
+      const accessToken = accessTokenString
+        ? JSON.parse(accessTokenString)
+        : null;
+
+      const response = await fetch("https://localhost:7259/api/Users/user", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+        },
+      });
+
+      if (response.ok) {
+        const data =
+          response.headers.get("Content-Length") !== "0"
+            ? await response.json()
+            : {};
+        setUser(data);
+        setEmail(data.email);
+        setUserName(data.userName);
+      } else {
+        // Handle the case where the response isn't ok (optional)
+        setUser(null);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  const handleSubmitUpdateUser = async (e) => {
     e.preventDefault();
     const accessTokenString = localStorage.getItem("accessToken");
     const accessToken = accessTokenString
       ? JSON.parse(accessTokenString)
       : null;
 
-    const responseUser = await fetch("https://localhost:7259/api/Users/user", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
-      },
-    });
-
-    if (responseUser.ok) {
-      const data =
-        responseUser.headers.get("Content-Length") !== "0"
-          ? await responseUser.json()
-          : {};
-      console.log(data);
+    if (user != null) {
       const responseUpdate = await fetch(
         "https://localhost:7259/api/Users/update-user",
         {
-          method: "POST",
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
           },
           body: JSON.stringify({
-            userId: data.userId,
+            userId: user.userId,
             userName: userName,
             email: email,
           }),
         }
       );
       if (responseUpdate.ok) {
-        console.log("Update username successful");
+        alert("Profile updated successfully.");
+        console.log("Profile updated successfully.");
       } else {
         const error =
           responseUpdate.headers.get("Content-Length") !== "0"
@@ -203,11 +228,54 @@ function Profile() {
         console.error("Update username failed:", JSON.stringify(error));
       }
     } else {
-      const error =
-        responseUser.headers.get("Content-Length") !== "0"
-          ? await responseUser.json()
-          : {};
-      console.error("Failed getting user info: " + JSON.stringify(error));
+      console.error("No user found when updating information");
+    }
+  };
+
+  const handleSubmitNewPassword = async (e) => {
+    e.preventDefault();
+    const accessTokenString = localStorage.getItem("accessToken");
+    const accessToken = accessTokenString
+      ? JSON.parse(accessTokenString)
+      : null;
+
+    if (newPassword !== confirmPassword) {
+      alert("New password and confirm password do not match.");
+      return;
+    }
+
+    const updatePasswordModel = {
+      userId: user.userId,
+      currentPassword: currentPassword,
+      newPassword: newPassword,
+    };
+
+    try {
+      const response = await fetch(
+        "https://localhost:7259/api/Users/update-password",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+          },
+          body: JSON.stringify(updatePasswordModel),
+        }
+      );
+
+      if (response.ok) {
+        alert("Password updated successfully.");
+        // Optionally, reset the form fields
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to update password: ${JSON.stringify(errorData)}`);
+      }
+    } catch (error) {
+      console.error("Error updating password:", error);
+      alert("An error occurred while updating the password.");
     }
   };
 
@@ -340,14 +408,24 @@ function Profile() {
           <div className="profile-content-right">
             <h1 className="mb-5">Profil detaljer</h1>
 
-            <form onSubmit={handleSubmitUsername} className="input-field-box">
+            <form onSubmit={handleSubmitUpdateUser} className="input-field-box">
               <div className="justify-space-between">
                 <label className="m-2 font-weight-bold">Användarnamn: </label>
                 <input
                   type="text"
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
-                  placeholder="Username"
+                  placeholder="Användarnamn"
+                  required
+                />
+              </div>
+              <div className="justify-space-between mt-2">
+                <label className="m-2 font-weight-bold">E-post: </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="E-post"
                   required
                 />
               </div>
@@ -355,50 +433,57 @@ function Profile() {
                 type="submit"
                 className="w-100 mt-2 btn btn-info font-weight-bold"
               >
-                Ändra användarnamn
+                Ändra profil detaljer
               </button>
             </form>
 
-            <form className="input-field-box">
-              <div className="justify-space-between">
-                <label className="m-2 font-weight-bold">E-post: </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Email"
-                  required
-                />
-              </div>
-              <button className="w-100 mt-2 btn btn-info font-weight-bold">
-                Ändra E-post
-              </button>
-            </form>
+            <form className="input-field-box"></form>
 
-            <div className="input-field-box">
+            <form
+              onSubmit={handleSubmitNewPassword}
+              className="input-field-box"
+            >
               <div className="justify-space-between">
                 <label className="m-2 font-weight-bold">
                   Nuvarande lösenord:{" "}
                 </label>
-                <input type="password"></input>
+                <input
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  required
+                />
               </div>
 
               <div className="justify-space-between mt-2">
                 <label className="m-2 font-weight-bold">Nytt lösenord: </label>
-                <input type="password"></input>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                />
               </div>
 
               <div className="justify-space-between mt-2">
                 <label className="m-2 font-weight-bold">
-                  Bekräfta lösenord:
+                  Bekräfta lösenord:{" "}
                 </label>
-                <input type="password"></input>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
               </div>
 
-              <button className="w-100 mt-2 btn btn-info font-weight-bold">
+              <button
+                type="submit"
+                className="w-100 mt-2 btn btn-info font-weight-bold"
+              >
                 Ändra lösenord
               </button>
-            </div>
+            </form>
           </div>
         </div>
         <div className="col-1"></div>
