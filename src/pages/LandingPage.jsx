@@ -3,12 +3,14 @@ import RegisterNewUser from "../components/Register";
 import { useNavigate } from "react-router-dom";
 import usePost from "../hooks/usePost";
 import { AuthContext } from "../contexts/AuthProvider";
+import Alerts from "../components/Alerts";
 
 import "../styles/LandingPage.css";
 
 function Landingpage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [alert, setAlert] = useState(null);
   const navigate = useNavigate();
   const authHandler = useContext(AuthContext);
   const loginHandler = usePost();
@@ -36,16 +38,30 @@ function Landingpage() {
     setModalVisible(!isModalVisible);
   };
 
-  const handleLogIn = () => {
+  const handleLogIn = async () => {
     console.log("Logg into game");
 
-    if (!email || !password) {
-      // Gör en pop up eller ngt senare om man skriver in fel email / password
-      console.log("Enter email and password");
-      return console.log("Fel!!!");
-    }
+    var loginAttempt = await loginHandler.saveData(
+      "https://localhost:7259/login",
+      user,
+      "POST"
+    );
 
-    loginHandler.saveData("https://localhost:7259/login", user, "POST");
+    // Aktivera Alert component
+    if (loginAttempt !== 200) {
+      setAlert({
+        // Sätt text: för varning
+        text: "Hey, fel lösenord eller email. Försök igen!",
+        type: "danger",
+      });
+      // Gör timer
+
+      setTimeout(() => {
+        setAlert(null);
+      }, 3000);
+
+      return;
+    }
   };
 
   // om lyckad == ge token och då syns navbar etc och skicka user till /home
@@ -58,9 +74,12 @@ function Landingpage() {
 
   return (
     <>
+      <div>
+        <div></div>
+      </div>
       <div className="centerMenu">
-        <div>
-          <h1>INSERT PICTURE HERE!</h1>
+        <div className="centerContainer">
+          <img className="frontPagePicture" src="../memorymagi-logo.png" />
           <div className="centerInputs">
             <input
               type="text"
@@ -81,6 +100,7 @@ function Landingpage() {
             <br />
             <button onClick={toggleSignUpModal}>Skapa konto</button>{" "}
             <button onClick={handleLogIn}>Logga in</button>
+            <Alerts alert={alert} />
           </div>
         </div>
       </div>

@@ -5,17 +5,20 @@ import { AuthContext } from "../contexts/AuthProvider";
 
 // hämta onRegister från LandingPage
 function RegisterNewUser({ toggleModal }) {
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const createNewUser = usePost();
 
   function Register() {
+    // lägg till username för register senare
     const userData = {
+      username,
       email,
       password,
     };
 
-    if (email === "" && password === "") {
+    if (username === "" && email === "" && password === "") {
       console.log("Please enter information in these boxes");
       console.log("Email måste innehålla '@'.");
       console.log(
@@ -25,7 +28,7 @@ function RegisterNewUser({ toggleModal }) {
     } else {
       // POST:a / skapa ny user till Db
       createNewUser
-        .saveData("https://localhost:7259/register", userData, "POST")
+        .saveData("https://localhost:7259/api/Users/register", userData, "POST")
         .then((response) => {
           if (response != "") {
             toggleModal();
@@ -40,6 +43,12 @@ function RegisterNewUser({ toggleModal }) {
     <>
       <div className="modalComponent">
         <p>Registera era uppgifter</p>
+        <input
+          type="text"
+          placeholder="Användarnamn"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
         <input
           type="text"
           placeholder="Email"
