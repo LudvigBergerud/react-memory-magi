@@ -13,6 +13,7 @@ function Navbar() {
   function handleLogOut() {
     postHandler.saveData("https://localhost:7259/logout", {}, "POST");
   }
+
   useEffect(() => {
     if (postHandler.response.status === 200) {
       authHandler.signOut();
@@ -41,9 +42,7 @@ function Navbar() {
           </div>
         </div>
       ) : (
-        <>
-          ""
-        </>
+        ""
       )}
     </>
   );
