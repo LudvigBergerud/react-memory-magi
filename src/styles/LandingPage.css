@@ -34,6 +34,18 @@
   margin-left: 50;
 }
 
+.centerContainer {
+  text-align: center;
+}
+
+.frontPagePicture {
+  display: block;
+  margin: 0 auto;
+  width: 300px;
+  height: auto;
+  transition: width 0.3s ease;
+}
+
 /* 
 .navbar {
     display: flex;
