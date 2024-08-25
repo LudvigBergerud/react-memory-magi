@@ -1,32 +1,41 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import "../styles/LandingPage.css";
 
 function Alerts({ alert }) {
-  if (!alert) {
-    return null;
-  }
+  const [fade, setFade] = useState(false);
 
-  var opacityValue;
-  if (alert) {
-    opacityValue = 1;
-  } else {
-    opacityValue = 0;
-  }
+  useEffect(() => {
+    if (alert) {
+      setFade(true);
+
+      // ta bort efter 2,5 sekunder
+      const fadeTimer = setTimeout(() => {
+        setFade(false);
+        // debugger;
+      }, 2500);
+
+      return () => {
+        clearTimeout(fadeTimer);
+      };
+    }
+  }, [alert]);
 
   const alertColor = {
     margin: "10px",
     borderRadius: "10px",
     padding: "10px",
     color: "#fff",
+    opacity: fade ? 1 : 0,
+    transition: "opacity 0.5s ease-out",
     backgroundColor: "#2196F3",
   };
 
-  return (
-    <div className="alert" style={alertColor}>
-      {alert.text}
-    </div>
-  );
+  if (!alert) {
+    return null;
+  }
+
+  return <div style={alertColor}>{alert.text}</div>;
 }
 
 export default Alerts;

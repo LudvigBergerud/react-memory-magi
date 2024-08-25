@@ -39,8 +39,6 @@ function Landingpage() {
   };
 
   const handleLogIn = async () => {
-    console.log("Logg into game");
-
     var loginAttempt = await loginHandler.saveData(
       "https://localhost:7259/login",
       user,
@@ -52,13 +50,7 @@ function Landingpage() {
       setAlert({
         // Sätt text: för varning
         text: "Hey, fel lösenord eller email. Försök igen!",
-        type: "danger",
       });
-      // Gör timer
-
-      setTimeout(() => {
-        setAlert(null);
-      }, 3000);
 
       return;
     }
@@ -75,49 +67,55 @@ function Landingpage() {
   return (
     <>
       <div>
-        <div></div>
-      </div>
-      <div className="centerMenu">
-        <div className="centerContainer">
-          <img className="frontPagePicture" src="../memorymagi-logo.png" />
-          <div className="centerInputs">
-            <input
-              type="text"
-              placeholder="E mail"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <br />
-            <br />
-            <input
-              type="password"
-              placeholder="Lösenord"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            {/* Gör Register till en Component */}
-            <br />
-            <br />
-            <button onClick={toggleSignUpModal}>Skapa konto</button>{" "}
-            <button onClick={handleLogIn}>Logga in</button>
-            <Alerts alert={alert} />
+        <div className="moveUP">
+          <div className="centerMenu">
+            <div className="centerContainer">
+              <div className="hoverPicture">
+                <img
+                  className="frontPagePicture"
+                  src="../memorymagi-logo.png"
+                />
+              </div>
+              <div className="centerInputs">
+                <input
+                  type="text"
+                  placeholder="E mail"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <br />
+                <br />
+                <input
+                  type="password"
+                  placeholder="Lösenord"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                {/* Gör Register till en Component */}
+                <br />
+                <br />
+                <button onClick={toggleSignUpModal}>Skapa konto</button>{" "}
+                <button onClick={handleLogIn}>Logga in</button>
+                <Alerts alert={alert} />
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/*Gör modal som poppar upp och stängs ner vid klick, stopPropagation = bubblar event  */}
-      {isModalVisible && (
-        <div className="modalOuter" onClick={toggleSignUpModal}>
-          <div className="modalInner" onClick={(e) => e.stopPropagation()}>
-            {/*Registera = Displaya info från Reg- comp */}
-            <RegisterNewUser
-              toggleModal={toggleSignUpModal}
-              onRegister={confirmRegister}
-            />
-            <button onClick={toggleSignUpModal}>X</button>{" "}
-          </div>
+          {/*Gör modal som poppar upp och stängs ner vid klick, stopPropagation = bubblar event  */}
+          {isModalVisible && (
+            <div className="modalOuter" onClick={toggleSignUpModal}>
+              <div className="modalInner" onClick={(e) => e.stopPropagation()}>
+                {/*Registera = Displaya info från Reg- comp */}
+                <RegisterNewUser
+                  toggleModal={toggleSignUpModal}
+                  onRegister={confirmRegister}
+                />
+                <button onClick={toggleSignUpModal}>X</button>{" "}
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </>
   );
 }
