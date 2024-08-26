@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import config from '../config';
 import "../App.css";
+import "../styles/Create.css";
 
 const CreateEntities = () => {
     const [selectedUserId] = useState('b7224020-c971-4b1c-b894-568fcc936dd6'); 
     const [activeForm, setActiveForm] = useState('category');
     const [categories, setCategories] = useState([]);
     const [items, setItems] = useState([]);
+    const [imagePreviewUrl, setImagePreviewUrl] = useState('');  
+    const [cardNamePreview, setCardNamePreview] = useState('');  
 
     useEffect(() => {
         if (selectedUserId) {
@@ -20,7 +23,7 @@ const CreateEntities = () => {
                 .then(data => setCategories(data))
                 .catch(error => console.error(error));
         }
-    
+
         fetch(`${config.apiUrl}/item`)
             .then(response => {
                 if (!response.ok) {
@@ -38,7 +41,7 @@ const CreateEntities = () => {
 
         const newItem = {
             name: formData.get('name'),
-            image: formData.get('image'),
+            image: formData.get('image'), 
             categoryId: parseInt(formData.get('categoryId'), 10),
         };
 
@@ -80,39 +83,78 @@ const CreateEntities = () => {
           .catch(error => console.error('Error creating category:', error));
     };
 
+    const handleImageLinkChange = (event) => {
+        const imageUrl = event.target.value;
+        setImagePreviewUrl(imageUrl || '');
+    };
+
+    const handleCardNameChange = (event) => {
+        const cardName = event.target.value;
+        setCardNamePreview(cardName || '');
+    };
+
+    const handleFormSwitch = (formType) => {
+        setActiveForm(formType);
+        setImagePreviewUrl('');
+        setCardNamePreview('');
+    };
+
     return (
-        <div className="create-entities">
+        <div className="container">
             <div className="button-group">
-                <button onClick={() => setActiveForm('category')}>Skapa Kategori</button>
-                <button onClick={() => setActiveForm('card')}>Skapa Kort</button>
+                <button onClick={() => handleFormSwitch('category')}>Skapa Kategori</button>
+                <button onClick={() => handleFormSwitch('card')}>Skapa Kort</button>
             </div>
 
-            {activeForm === 'category' && (
-                <form onSubmit={handleSubmitCategory}>
-                    <label>Namn på kategorin:</label>
-                    <input type="text" name="name" required />
-                    <button type="submit">Skapa Kategori</button>
-                </form>
-            )}
+            <div className="form-section">
+                {activeForm === 'category' && (
+                    <form onSubmit={handleSubmitCategory}>
+                        <label>Namn på kategorin:</label>
+                        <input type="text" name="name" required />
+                        <button type="submit">Skapa Kategori</button>
+                    </form>
+                )}
 
-            {activeForm === 'card' && (
-                <form onSubmit={handleSubmitCard}>
-                    <label>Namn på kortet:</label>
-                    <input type="text" name="name" required />
+                {activeForm === 'card' && (
+                    <>
+                        <form onSubmit={handleSubmitCard}>
+                            <label>Namn på kortet:</label>
+                            <input 
+                                type="text" 
+                                name="name" 
+                                required 
+                                onChange={handleCardNameChange} 
+                            />
 
-                    <label>Bild URL:</label>
-                    <input type="url" name="image" required />
+                            <label>Bild URL:</label>
+                            <input 
+                                type="url" 
+                                name="image" 
+                                required 
+                                onChange={handleImageLinkChange} 
+                            />
 
-                    <label>Välj kategori:</label>
-                    <select name="categoryId" required>
-                        {categories.map(category => (
-                            <option key={category.id} value={category.id}>{category.name}</option>
-                        ))}
-                    </select>
+                            <label>Välj kategori:</label>
+                            <select name="categoryId" required>
+                                {categories.map(category => (
+                                    <option key={category.id} value={category.id}>{category.name}</option>
+                                ))}
+                            </select>
 
-                    <button type="submit">Skapa Kort</button>
-                </form>
-            )}
+                            <button type="submit">Skapa Kort</button>
+                        </form>
+
+                        {imagePreviewUrl && cardNamePreview && (
+                            <div className="card-preview">
+                                <div className="card">
+                                    <img src={imagePreviewUrl} alt="Preview" />
+                                    <div className="card-name">{cardNamePreview}</div>
+                                </div>
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
         </div>
     );
 };
