@@ -3,12 +3,14 @@ import RegisterNewUser from "../components/Register";
 import { useNavigate } from "react-router-dom";
 import usePost from "../hooks/usePost";
 import { AuthContext } from "../contexts/AuthProvider";
+import Alerts from "../components/Alerts";
 
 import "../styles/LandingPage.css";
 
 function Landingpage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [alert, setAlert] = useState(null);
   const navigate = useNavigate();
   const authHandler = useContext(AuthContext);
   const loginHandler = usePost();
@@ -36,16 +38,22 @@ function Landingpage() {
     setModalVisible(!isModalVisible);
   };
 
-  const handleLogIn = () => {
-    console.log("Logg into game");
+  const handleLogIn = async () => {
+    var loginAttempt = await loginHandler.saveData(
+      "https://localhost:7259/login",
+      user,
+      "POST"
+    );
 
-    if (!email || !password) {
-      // Gör en pop up eller ngt senare om man skriver in fel email / password
-      console.log("Enter email and password");
-      return console.log("Fel!!!");
+    // Aktivera Alert component
+    if (loginAttempt !== 200) {
+      setAlert({
+        // Sätt text: för varning
+        text: "Hey, fel lösenord eller email. Försök igen!",
+      });
+
+      return;
     }
-
-    loginHandler.saveData("https://localhost:7259/login", user, "POST");
   };
 
   // om lyckad == ge token och då syns navbar etc och skicka user till /home
@@ -58,46 +66,56 @@ function Landingpage() {
 
   return (
     <>
-      <div className="centerMenu">
-        <div>
-          <h1>INSERT PICTURE HERE!</h1>
-          <div className="centerInputs">
-            <input
-              type="text"
-              placeholder="E mail"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <br />
-            <br />
-            <input
-              type="password"
-              placeholder="Lösenord"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            {/* Gör Register till en Component */}
-            <br />
-            <br />
-            <button onClick={toggleSignUpModal}>Skapa konto</button>{" "}
-            <button onClick={handleLogIn}>Logga in</button>
+      <div>
+        <div className="moveUP">
+          <div className="centerMenu">
+            <div className="centerContainer">
+              <div className="hoverPicture">
+                <img
+                  className="frontPagePicture"
+                  src="../memorymagi-logo.png"
+                />
+              </div>
+              <div className="centerInputs">
+                <input
+                  type="text"
+                  placeholder="E mail"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <br />
+                <br />
+                <input
+                  type="password"
+                  placeholder="Lösenord"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                {/* Gör Register till en Component */}
+                <br />
+                <br />
+                <button onClick={toggleSignUpModal}>Skapa konto</button>{" "}
+                <button onClick={handleLogIn}>Logga in</button>
+                <Alerts alert={alert} />
+              </div>
+            </div>
           </div>
+
+          {/*Gör modal som poppar upp och stängs ner vid klick, stopPropagation = bubblar event  */}
+          {isModalVisible && (
+            <div className="modalOuter" onClick={toggleSignUpModal}>
+              <div className="modalInner" onClick={(e) => e.stopPropagation()}>
+                {/*Registera = Displaya info från Reg- comp */}
+                <RegisterNewUser
+                  toggleModal={toggleSignUpModal}
+                  onRegister={confirmRegister}
+                />
+                <button onClick={toggleSignUpModal}>X</button>{" "}
+              </div>
+            </div>
+          )}
         </div>
       </div>
-
-      {/*Gör modal som poppar upp och stängs ner vid klick, stopPropagation = bubblar event  */}
-      {isModalVisible && (
-        <div className="modalOuter" onClick={toggleSignUpModal}>
-          <div className="modalInner" onClick={(e) => e.stopPropagation()}>
-            {/*Registera = Displaya info från Reg- comp */}
-            <RegisterNewUser
-              toggleModal={toggleSignUpModal}
-              onRegister={confirmRegister}
-            />
-            <button onClick={toggleSignUpModal}>X</button>{" "}
-          </div>
-        </div>
-      )}
     </>
   );
 }

@@ -2,11 +2,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  width: 100vw;
-  position: fixed;
+  flex-direction: column;
 }
 
+.centerContainer {
+  text-align: center;
+}
 .centerInputs {
   text-align: center;
 }
@@ -34,28 +35,14 @@
   margin-left: 50;
 }
 
-/* 
-.navbar {
-    display: flex;
-    align-items: center;
-    position: fixed;
-    background-color: lightgreen;
-    padding: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 55%;
-  }
-  
-  .navbar img.nav-logo {
-    width: 50px;
-    height: auto;
-    margin-right: 25px;
-  }
-  
-  .navbar a {
-    margin-right: 85px;
-    text-decoration: none;
-    color: #000;
-    font-weight: bold;
-  }
-   */
+.frontPagePicture {
+  display: block;
+  margin: 0 auto;
+  width: 300px;
+  height: auto;
+  transition: transform 0.3s ease;
+}
+
+.frontPagePicture:hover {
+  transform: scale(1.1);
+}
