@@ -19,7 +19,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <Navbar />
+        <Navbar></Navbar>
         <Routes>
           <Route path="/landingpage" element={<LandingPage />} />
           <Route path="/" element={<Home />} />
@@ -40,4 +40,3 @@ function App() {
 }
 
 export default App;
-
