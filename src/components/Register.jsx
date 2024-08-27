@@ -67,14 +67,7 @@ function RegisterNewUser({ toggleModal }) {
         <button onClick={Register}>Registrera</button>
         <Alerts alert={alert} />
       </div>
-      <div>
-        <p>Email måste ha: @</p>
-        <p>Lösenord måste ha en 'STORBOKSTAV' </p>
-        <p>
-          Lösenord måste ha 1 av dessa tecken: ! @ # $ % ^ & * ( ) _ - + ={" "}
-          <> ? / "</>"
-        </p>
-      </div>
+      <div></div>
     </>
   );
 }
