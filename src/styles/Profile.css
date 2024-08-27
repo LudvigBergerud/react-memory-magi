@@ -1,0 +1,109 @@
+.profile-page {
+  min-width: 100vw;
+  min-height: 85vh;
+  display: flex;
+  justify-content: center;
+  align-items: start;
+  overflow: scroll;
+}
+.profile-content {
+  height: 50vh;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  padding: 5vh;
+}
+.profile-menu {
+  padding-top: 20vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 50vh;
+}
+.btn-secondary {
+  margin-top: 1vh;
+  width: 80%;
+}
+.profile-content-left {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  width: 80%;
+}
+.profile-content-right {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+}
+.input-field-box {
+  margin-top: 5vh;
+  width: 55%;
+  display: flex;
+  justify-content: start;
+  flex-wrap: wrap;
+}
+.font-weight-bold {
+  font-weight: bold;
+}
+.justify-space-between {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+.achievements-section {
+  margin-top: 20px;
+}
+
+.achievements-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.achievements-box {
+  max-height: 50vh;
+  overflow: scroll;
+}
+.achievement-item {
+  padding: 10px;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  text-align: center;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.achievements-earned .achievement-item {
+  background-color: #d4edda;
+}
+
+.achievements-not-earned .achievement-item {
+  background-color: #f8d7da;
+}
+.achievement-item {
+  position: relative;
+  display: inline-block;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.custom-tooltip {
+  position: absolute;
+  top: 50%; /* Adjust based on your preference */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 5px;
+  white-space: nowrap;
+  z-index: 1;
+  margin-top: 5px;
+  opacity: 0.9;
+  pointer-events: none;
+  overflow: visible;
+}

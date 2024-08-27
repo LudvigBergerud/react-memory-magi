@@ -1,0 +1,48 @@
+.centerMenu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.centerContainer {
+  text-align: center;
+}
+.centerInputs {
+  text-align: center;
+}
+
+.modalOuter {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modalInner {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  position: relative;
+}
+
+.mr-4 {
+  margin-left: 50;
+}
+
+.frontPagePicture {
+  display: block;
+  margin: 0 auto;
+  width: 300px;
+  height: auto;
+  transition: transform 0.3s ease;
+}
+
+.frontPagePicture:hover {
+  transform: scale(1.1);
+}

@@ -1,51 +1,55 @@
-
-@import url('https://fonts.googleapis.com/css2?family=Arima+Madurai:wght@400;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Arima+Madurai:wght@400;700&display=swap");
 
 body {
-    min-height: 100vh;
-    min-width: 100vw;
-    background: linear-gradient(180deg, #202B8A 0%, #8AD4E6 100%);
-    font-family: 'Arima Madurai', cursive;
-    color: #000000;
+  min-height: 100vh;
+  min-width: 100vw;
+  background: linear-gradient(180deg, #202b8a 0%, #8ad4e6 100%);
+  font-family: "Arima Madurai", cursive;
+  color: #000000;
+  padding-top: 7.5vh;
+  margin: 0;
+  padding-bottom: 7.5vh;
+  padding-left: 0;
+  padding-right: 0;
 }
 
-input{
-    background-color: #F3F3F3;
-    border: 1px solid #000000;
-    border-radius: 12px;
-    font-family: 'Arima Madurai', cursive;
-    font-size: medium;
+input {
+  background-color: #f3f3f3;
+  border: 1px solid #000000;
+  border-radius: 12px;
+  font-family: "Arima Madurai", cursive;
+  font-size: medium;
 }
 
 input::placeholder {
-    color: #0000009b; 
+  color: #0000009b;
 }
 
 button {
-    border: 1px solid #000000;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: medium;
-    font-family: 'Arima Madurai', cursive;
-    background-color: #3547E1 ;
+  border: 1px solid #000000;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: medium;
+  font-family: "Arima Madurai", cursive;
+  background-color: #3547e1;
 }
 
 button:hover {
-    background-color: #858cca;
+  background-color: #858cca;
 }
 
 ::-webkit-scrollbar-track {
-    background: transparent;
+  background: transparent;
 }
 
 ::-webkit-scrollbar {
-    width: 12px;
-    scrollbar-width: thin; 
-    scrollbar-color: #888 transparent; 
+  width: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: #888 transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: #888;
-    border-radius: 10px;
-    border: 3px solid transparent;
+  background-color: #888;
+  border-radius: 10px;
+  border: 3px solid transparent;
 }

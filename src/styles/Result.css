@@ -1,0 +1,114 @@
+.result-page {
+  min-width: 100vw;
+  min-height: 85vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: scroll;
+}
+.result-box {
+  border: 2px solid rgb(128, 236, 231);
+  border-radius: 5vh;
+  background: -webkit-linear-gradient(rgb(128, 236, 231), rgb(62, 62, 158));
+  min-width: 50vh;
+  min-height: 30vh;
+  height: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: column;
+  padding: 4vh;
+  position: relative;
+}
+.result-title {
+  margin: 0;
+  user-select: none;
+  font-weight: bolder;
+  font-size: 8vh;
+  background: -webkit-linear-gradient(rgb(174, 197, 68), rgb(22, 21, 95));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.result-time-text {
+  font-size: xx-large;
+  margin: 1vh 0;
+}
+.leaderboard-title {
+  font-size: 3vh;
+  margin: 2vh 0 1vh;
+  font-weight: bold;
+  color: #ffffff;
+}
+.leaderboard-box {
+  background: #fafafa;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1vh;
+  width: 100%;
+  min-height: 10vh;
+  max-height: 20vh;
+  overflow-y: auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.leaderboard-entry {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5vh 0;
+  border-bottom: 1px solid #ddd;
+}
+.leaderboard-rank {
+  font-weight: bold;
+  color: #333;
+}
+
+.leaderboard-userID {
+  margin-right: 10px;
+  font-weight: bold;
+  color: #555;
+}
+
+.leaderboard-time {
+  font-weight: bold;
+  color: #333;
+}
+
+.animated-image {
+  position: fixed;
+  z-index: -1;
+  animation: scaleAnimation 7s infinite;
+}
+
+.image1 {
+  top: 20%;
+  left: 10%;
+}
+
+.image2 {
+  bottom: 10%;
+  right: 10%;
+}
+
+@keyframes scaleAnimation {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+}
+.btn-play-again {
+  margin: 1vh;
+  width: 20vw;
+  font-weight: bold !important;
+}
+.btn-go-back {
+  margin: 1vh;
+  width: 20vw;
+  font-weight: bold !important;
+}
