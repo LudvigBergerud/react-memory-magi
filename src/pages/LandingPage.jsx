@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import RegisterNewUser from "../components/Register";
 import { useNavigate } from "react-router-dom";
-import usePost from "../hooks/usePost";
+import useFetch from "../hooks/useFetch";
 import { AuthContext } from "../contexts/AuthProvider";
 import Alerts from "../components/Alerts";
 
@@ -13,7 +13,7 @@ function Landingpage() {
   const [alert, setAlert] = useState(null);
   const navigate = useNavigate();
   const authHandler = useContext(AuthContext);
-  const loginHandler = usePost();
+  const loginHandler = useFetch();
   const user = { email, password }; // binda till Value
 
   // skap en toggle för Modal
@@ -39,10 +39,10 @@ function Landingpage() {
   };
 
   const handleLogIn = async () => {
-    var loginAttempt = await loginHandler.saveData(
+    var loginAttempt = await loginHandler.handleData(
       "https://localhost:7259/login",
-      user,
-      "POST"
+      "POST",
+      user
     );
 
     // Aktivera Alert component
