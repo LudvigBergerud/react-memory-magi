@@ -59,7 +59,7 @@ function Landingpage() {
   // om lyckad == ge token och då syns navbar etc och skicka user till /home
   useEffect(() => {
     if (loginHandler.response.status === 200 && loginHandler.data !== null) {
-      authHandler.signIn(loginHandler.data.accessToken);
+      authHandler.signIn(loginHandler.data);
       navigate("/home");
     }
   }, [loginHandler.data]);
