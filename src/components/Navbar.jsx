@@ -1,7 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import "../styles/Navbar.css";
 import { NavLink, useNavigate } from "react-router-dom";
-import { House, PlusLg, BoxArrowRight } from "react-bootstrap-icons";
+import {
+  House,
+  PlusLg,
+  BoxArrowRight,
+  PersonCircle,
+} from "react-bootstrap-icons";
 import usePost from "../hooks/usePost";
 import { AuthContext } from "../contexts/AuthProvider";
 
@@ -35,6 +40,10 @@ function Navbar() {
             <NavLink to="#">
               <PlusLg className="icon" />
               <span>Skapa spel</span>
+            </NavLink>
+            <NavLink to="/profile">
+              <PersonCircle />
+              <span>Profil</span>
             </NavLink>
             <a onClick={handleLogOut}>
               <BoxArrowRight className="icon" /> <span>Logga ut</span>
