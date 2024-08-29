@@ -9,11 +9,17 @@ function Home() {
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
   const [selectedGames, setSelectedGames] = useState({});
-  const [filters, setFilters] = useState([]);
-  
+  const [filters, setFilter] = useState('public');
+
+
+  const filterChange = (filter) => {
+    setFilter(filter);
+  };
+
   const handleSelect = (game, index) => {
     console.log(game);
-    // Update the selected game for the specific card
+    setSelectedGames({});
+
     setSelectedGames(prevState => ({
       ...prevState,
       [index]: {
@@ -59,15 +65,25 @@ function Home() {
 
         <div className="text-center mb-4">
         <h1>Welcome to Memory-Magi</h1>
-          <button className="btn btn-primary me-3">Publika spel</button>
-          <button className="btn btn-primary">Privata spel</button>
+        <button
+        className={`btn me-3 ${filters === 'public' ? 'btn-success' : 'btn-primary'}`} onClick={() => filterChange('public')}>Publika spel</button>
+          <button
+        className={`btn ${filters === 'private' ? 'btn-success' : 'btn-primary'}`} onClick={() => filterChange('private')}>Privata spel</button>
         </div>
        
         <div className="row justify-content-center" >
       
-           {categories.map((category, index) => (
+        {(filters.length === 0 ? categories : categories.filter(category => {
+    if (filters.includes("public")) {
+        return category.HasPublicGames;
+    } else if (filters.includes("private")) {
+        return category.HasPrivateGames;
+    }
+    
+}))
+.map((category, index) => (
             
-     <div key={category.Id} className="card mb-2 mx-2"style={{ borderRadius: "50px", position:"relative", overflow:"hidden", width:"350px", height:"425px"}} >
+     <div key={category.Id} className="card mb-2 mx-2 col-md-3"style={{ borderRadius: "50px", position:"relative", overflow:"hidden", width:"350px", height:"425px"}} >
   
      <div className="card-body text-center" >
      <h2 className="card-title">{category.Name}</h2>
@@ -79,7 +95,16 @@ function Home() {
         {selectedGames[index]?.gameName  || "Välj spel"} 
         </Dropdown.Toggle>
         <Dropdown.Menu>
-        {category.AllGames.$values.map((game) =>(
+        {category.AllGames.$values
+        .filter(game => {
+            if (filters.includes("public")) {
+                return game.GameType.toLowerCase() === "public"; 
+            }
+            if (filters.includes("private")) {
+                return game.GameType.toLowerCase() === "private"; 
+            }
+        })
+        .map((game) =>(
             <Dropdown.Item   key={game.Id}  href="#" onClick={() => handleSelect(game,index)}>
               {game.DifficultyLevel} - {game.Id}
             
@@ -92,7 +117,6 @@ function Home() {
       </Dropdown>
        
        <a onClick={
-       
         () => startGame(selectedGames[index].id, selectedGames[index].difficulty)} className="btn btn-primary">Starta spel</a>
      </div>
    </div>

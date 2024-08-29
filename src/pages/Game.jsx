@@ -1,5 +1,5 @@
 import React, {useState,useEffect, useRef} from 'react'
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, Link,useNavigate } from 'react-router-dom';
 import cardback from '../assets/cardBack.png'
 import cardFront from '../assets/cardFront.png'
 import './Game.css'
@@ -11,14 +11,20 @@ function Game() {
   const [flippedcards, setNewflipState] = useState({});
   const [listOfFlippedCards, setList] = useState([]);
   const [time, setTime] = useState(0);
+  const [resultTime, setResultTime] =useState(0);
+  const navigate = useNavigate();
+  const [isRunning, setIsRunning] = useState(true);
 
   let gameId= gameData?.gameId; //Denna behöver routas in beroende på vilket spel användare väljer
   let difficulty =gameData?.difficultyLevel; // Samma som ovan, routas in från quiz home page sidan, tillfällig variabel.
   let userId ="new_user_id"; //samma som ovan, tillfällig variabel
- // console.log(location.state);
+ // console.log(location);
   //console.log(gameData);
 //console.log("Objekt från HOME:"+gameData + JSON.stringify(gameData));
 //console.log(categoryId);
+
+const accessTokenString = localStorage.getItem("accessToken");
+const accessToken = accessTokenString ? JSON.parse(accessTokenString) : null;
 
 useEffect(() => {
   if (items.length === 0) {
@@ -89,13 +95,20 @@ console.log("kortid-:"+id)
   }, []);
 
   useEffect(() => {
-    let interval;
+    if(isRunning)
+    {
+      let interval;
 
-    interval = setInterval(() => {
-      setTime((prevTime) => prevTime + 10);
-    }, 10);
-
-    return () => clearInterval(interval);
+      interval = setInterval(() => {
+        setTime((prevTime) => prevTime + 10);
+      }, 10);
+  
+      return () => clearInterval(interval);
+    }
+    else{
+      return
+    }
+ 
   });
 
   //Denna är aktiv hela tiden och kollar hur många kort som är klickade just nu.
@@ -110,6 +123,8 @@ console.log("kortid-:"+id)
       if (firstCard === secondCard) {
 
         console.log("Korten matchar");
+        setIsRunning(false);
+        EndGame();
         setTimeout(() => {
           setNewflipState({});
           setList([]);
@@ -129,6 +144,20 @@ console.log("kortid-:"+id)
       }
     }
   }, [flippedcards]);
+
+  const EndGame= () =>{
+    const minutes = String(Math.floor((time / 60000) % 60)).slice(-2)
+    const seconds = String(Math.floor((time % 60000) / 1000)).slice(-2);
+
+    var timeResult= `${minutes}:${seconds}`;
+
+    var ResultData = {gameId:gameId,time:timeResult
+    }
+    console.log(ResultData);
+    navigate("/Result", { state: {ResultData}});
+
+
+  }
 
   return (
     <div className="container">
