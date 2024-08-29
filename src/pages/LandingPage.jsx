@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import useFetch from "../hooks/useFetch";
 import { AuthContext } from "../contexts/AuthProvider";
 import Alerts from "../components/Alerts";
+import ForgotPassword from "../components/ForgotPassword";
 
 import "../styles/LandingPage.css";
 
@@ -18,6 +19,7 @@ function Landingpage() {
 
   // skap en toggle för Modal
   const [isModalVisible, setModalVisible] = useState(false);
+  const [isModalVisibleForgott, setModalVisibleForgott] = useState(false);
 
   // spara username, email, password i en variabel / objekt
   const [newUser, setnewUser] = useState({
@@ -36,6 +38,11 @@ function Landingpage() {
   // om toggled = display, annars not
   const toggleSignUpModal = () => {
     setModalVisible(!isModalVisible);
+  };
+
+  //Toggla för Forgot password
+  const toggleForgottPassword = () => {
+    setModalVisibleForgott(!isModalVisibleForgott);
   };
 
   const handleLogIn = async () => {
@@ -79,7 +86,7 @@ function Landingpage() {
               <div className="centerInputs">
                 <input
                   type="text"
-                  placeholder="E mail"
+                  placeholder="Användarnamn"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -97,6 +104,15 @@ function Landingpage() {
                 <button onClick={toggleSignUpModal}>Skapa konto</button>{" "}
                 <button onClick={handleLogIn}>Logga in</button>
                 <Alerts alert={alert} />
+                <br />
+                <br />
+                <button
+                  className="forgotInfoButton"
+                  onClick={toggleForgottPassword}
+                >
+                  Glömt lösenord?{" "}
+                </button>
+                {/* <ForgotPassword></ForgotPassword> */}
               </div>
             </div>
           </div>
@@ -111,6 +127,15 @@ function Landingpage() {
                   onRegister={confirmRegister}
                 />
                 <button onClick={toggleSignUpModal}>X</button>{" "}
+              </div>
+            </div>
+          )}
+
+          {/*Gör Forgott password modal: gör som Register */}
+          {isModalVisibleForgott && (
+            <div className="modalOuter" onClick={toggleForgottPassword}>
+              <div className="modalInner" onClick={(f) => f.stopPropagation()}>
+                <ForgotPassword toggleForgottModal={toggleForgottPassword} />
               </div>
             </div>
           )}
