@@ -1,9 +1,10 @@
 import React, { useContext, useEffect, useState } from "react";
 import RegisterNewUser from "../components/Register";
 import { useNavigate } from "react-router-dom";
-import usePost from "../hooks/usePost";
+import useFetch from "../hooks/useFetch";
 import { AuthContext } from "../contexts/AuthProvider";
 import Alerts from "../components/Alerts";
+import ForgotPassword from "../components/ForgotPassword";
 
 import "../styles/LandingPage.css";
 
@@ -13,11 +14,12 @@ function Landingpage() {
   const [alert, setAlert] = useState(null);
   const navigate = useNavigate();
   const authHandler = useContext(AuthContext);
-  const loginHandler = usePost();
+  const loginHandler = useFetch();
   const user = { email, password }; // binda till Value
 
   // skap en toggle för Modal
   const [isModalVisible, setModalVisible] = useState(false);
+  const [isModalVisibleForgott, setModalVisibleForgott] = useState(false);
 
   // spara username, email, password i en variabel / objekt
   const [newUser, setnewUser] = useState({
@@ -38,11 +40,16 @@ function Landingpage() {
     setModalVisible(!isModalVisible);
   };
 
+  //Toggla för Forgot password
+  const toggleForgottPassword = () => {
+    setModalVisibleForgott(!isModalVisibleForgott);
+  };
+
   const handleLogIn = async () => {
-    var loginAttempt = await loginHandler.saveData(
+    var loginAttempt = await loginHandler.handleData(
       "https://localhost:7259/login",
-      user,
-      "POST"
+      "POST",
+      user
     );
 
     // Aktivera Alert component
@@ -59,7 +66,7 @@ function Landingpage() {
   // om lyckad == ge token och då syns navbar etc och skicka user till /home
   useEffect(() => {
     if (loginHandler.response.status === 200 && loginHandler.data !== null) {
-      authHandler.signIn(loginHandler.data.accessToken);
+      authHandler.signIn(loginHandler.data);
       navigate("/home");
     }
   }, [loginHandler.data]);
@@ -79,7 +86,7 @@ function Landingpage() {
               <div className="centerInputs">
                 <input
                   type="text"
-                  placeholder="E mail"
+                  placeholder="Användarnamn"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -97,6 +104,15 @@ function Landingpage() {
                 <button onClick={toggleSignUpModal}>Skapa konto</button>{" "}
                 <button onClick={handleLogIn}>Logga in</button>
                 <Alerts alert={alert} />
+                <br />
+                <br />
+                <button
+                  className="forgotInfoButton"
+                  onClick={toggleForgottPassword}
+                >
+                  Glömt lösenord?{" "}
+                </button>
+                {/* <ForgotPassword></ForgotPassword> */}
               </div>
             </div>
           </div>
@@ -111,6 +127,15 @@ function Landingpage() {
                   onRegister={confirmRegister}
                 />
                 <button onClick={toggleSignUpModal}>X</button>{" "}
+              </div>
+            </div>
+          )}
+
+          {/*Gör Forgott password modal: gör som Register */}
+          {isModalVisibleForgott && (
+            <div className="modalOuter" onClick={toggleForgottPassword}>
+              <div className="modalInner" onClick={(f) => f.stopPropagation()}>
+                <ForgotPassword toggleForgottModal={toggleForgottPassword} />
               </div>
             </div>
           )}

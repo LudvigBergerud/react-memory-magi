@@ -19,8 +19,11 @@ export const AuthProvider = ({ children }) => {
     fetchAccessToken();
   }, []);
 
-  function signIn(token) {
-    localStorageHandler.setLocalStorage("accessToken", token);
+  function signIn(tokenObj) {
+    const currentDate = Date.now();
+    //Get timestamp for when token expires
+    tokenObj.TimeStamp = currentDate / 1000;
+    localStorageHandler.setLocalStorage("accessToken", tokenObj);
     setIsAuthenticated(true);
   }
 
