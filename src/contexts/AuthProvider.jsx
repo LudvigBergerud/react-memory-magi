@@ -4,7 +4,8 @@ import useLocalStorage from "../hooks/useLocalStorage";
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  //Initialize as null to make sure the state is not pre-set to false, which led to authenticated users being redirected to landing page as well.
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
   const localStorageHandler = useLocalStorage();
 
   useEffect(() => {
@@ -12,18 +13,13 @@ export const AuthProvider = ({ children }) => {
       const accessToken = await localStorageHandler.getLocalStorage(
         "accessToken"
       );
-      if (accessToken !== null) {
-        setIsAuthenticated(true);
-      }
+      setIsAuthenticated(accessToken !== null);
     };
     fetchAccessToken();
   }, []);
 
-  function signIn(tokenObj) {
-    const currentDate = Date.now();
-    //Get timestamp for when token expires
-    tokenObj.TimeStamp = currentDate / 1000;
-    localStorageHandler.setLocalStorage("accessToken", tokenObj);
+  function signIn(token) {
+    localStorageHandler.setLocalStorage("accessToken", token);
     setIsAuthenticated(true);
   }
 
