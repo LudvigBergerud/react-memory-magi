@@ -23,6 +23,7 @@ export const AuthProvider = ({ children }) => {
     //Get timestamp for when token expires
     tokenObj.TimeStamp = currentDate / 1000;
     localStorageHandler.setLocalStorage("accessToken", tokenObj);
+    setIsAuthenticated(true);
   }
 
   function signOut() {
