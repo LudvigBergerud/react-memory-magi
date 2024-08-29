@@ -14,6 +14,8 @@ import Profile from "./pages/Profile";
 import Footer from "./components/Footer";
 import AboutUs from "./pages/AboutUs";
 import FAQ from "./pages/FAQ";
+import RegisterNewUser from "./components/Register";
+import Create from "./pages/Create";
 
 function App() {
   return (
@@ -28,10 +30,10 @@ function App() {
           <Route path="/result" element={<Result />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<NotFound />} />
-
           <Route path="/aboutus" element={<AboutUs />} />
           <Route path="/FAQ" element={<FAQ />} />
-
+          <Route path="/create" element={<Create/>} />
+          <Route path="/register" element={<RegisterNewUser/>} />
         </Routes>
         <Footer></Footer>
       </Router>
