@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import usePost from "../hooks/usePost";
+import useFetch from "../hooks/useFetch";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthProvider";
 import Alerts from "../components/Alerts";
@@ -9,7 +9,8 @@ function RegisterNewUser({ toggleModal }) {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const createNewUser = usePost();
+  const createNewUser = useFetch();
+
   const [alert, setAlert] = useState(null);
 
   const Register = async () => {
@@ -27,7 +28,11 @@ function RegisterNewUser({ toggleModal }) {
     } else {
       // POST:a / skapa ny user till Db
       await createNewUser
-        .saveData("https://localhost:7259/api/Users/register", userData, "POST")
+        .handleData(
+          "https://localhost:7259/api/Users/register",
+          "POST",
+          userData
+        )
 
         .then((response) => {
           //debugger;
@@ -67,14 +72,7 @@ function RegisterNewUser({ toggleModal }) {
         <button onClick={Register}>Registrera</button>
         <Alerts alert={alert} />
       </div>
-      <div>
-        <p>Email måste ha: @</p>
-        <p>Lösenord måste ha en 'STORBOKSTAV' </p>
-        <p>
-          Lösenord måste ha 1 av dessa tecken: ! @ # $ % ^ & * ( ) _ - + ={" "}
-          <> ? / "</>"
-        </p>
-      </div>
+      <div></div>
     </>
   );
 }
