@@ -41,3 +41,24 @@
 #nav-container a:hover {
   color: #ff9033;
 }
+#navbar-dropdown {
+  display: none;
+}
+#navbar-dropdown a {
+  color: #202b8a;
+}
+#dropdown-toggle {
+  background-color: transparent;
+  border: none;
+  color: #e5e5e5;
+}
+
+@media (max-width: 700px) {
+  #navbar-dropdown {
+    display: flex;
+    justify-content: flex-end;
+  }
+  #navlinks-wrapper {
+    display: none;
+  }
+}

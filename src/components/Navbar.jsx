@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import "../styles/Navbar.css";
 import { NavLink, useNavigate } from "react-router-dom";
-import { Nav } from "react-bootstrap";
+import { Dropdown } from "react-bootstrap";
 
 import useFetch from "../hooks/useFetch";
 
@@ -46,6 +46,7 @@ function Navbar() {
         </div>
         {authHandler.isAuthenticated ? (
           <>
+            {" "}
             <div id="navlinks-wrapper">
               <NavLink to="#">
                 <PlusLg className="icon" />
@@ -59,6 +60,25 @@ function Navbar() {
                 <BoxArrowRight className="icon" /> <span>Logga ut</span>
               </a>
             </div>
+            <Dropdown id="navbar-dropdown">
+              <Dropdown.Toggle id="dropdown-toggle">Meny</Dropdown.Toggle>
+              <Dropdown.Menu>
+                <Dropdown.Item href="/create">
+                  {" "}
+                  <PlusLg className="icon" />
+                  Skapa spel
+                </Dropdown.Item>
+                <Dropdown.Item href="/profile">
+                  {" "}
+                  <PersonCircle />
+                  Profil
+                </Dropdown.Item>
+                <Dropdown.Item onClick={handleLogOut}>
+                  <BoxArrowRight />
+                  Logga ut
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
           </>
         ) : (
           ""
