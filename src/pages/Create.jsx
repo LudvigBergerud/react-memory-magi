@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Modal } from 'react-bootstrap';
 import ItemPopupModal from "../components/ItemPopupModal";
 import CategoryPopupModal from "../components/CategoryPopupModal";
 import "../styles/Create.css";
@@ -9,11 +10,13 @@ function Create() {
   const [selectedDifficultyLevel, setSelectedDifficultyLevel] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [gameType, setGameType] = useState('');
-  const [cards, setCards] = useState([]);  
+  const [gameName, setGameName] = useState(''); 
+  const [cards, setCards] = useState([]);
   const [error, setError] = useState('');
-  const [user, setUser] = useState(null); 
+  const [userId, setUserId] = useState(null); 
   const [showModal, setShowModal] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
 
   const navigate = useNavigate();
 
@@ -34,27 +37,24 @@ function Create() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${accessToken}`,
       },
-    }).then(response => response.json())
-      .then(data => setCategories(data))
-      .catch(error => setError(`Fel vid hämtning av kategorier: ${error.message}`));
-
-    fetch('https://localhost:7259/api/Users/user', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`,
-      },
-    }).then(response => response.json())
-      .then(data => {
-        if (data && data.id && data.userName) {
-          setUser(data);
-        } else {
-          setError('Användardata är ofullständig eller saknas. Vänligen logga in igen.');
-        }
-      }).catch(error => {
-        setError(`Fel vid hämtning av användare: ${error.message}`);
-      });
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Categories API Response:', data);
+      setCategories(Array.isArray(data.categories) ? data.categories : []);
+      setUserId(data.userId || null);
+    })
+    .catch(error => handleShowError(`Fel vid hämtning av kategorier: ${error.message}`));
   }, [navigate]);
+
+  const handleShowError = (message) => {
+    setError(message);
+    setShowErrorModal(true);
+  };
+
+  const handleCloseError = () => {
+    setShowErrorModal(false);
+  };
 
   const handleSaveCard = (newCard) => {
     newCard.gameId = -1; 
@@ -74,16 +74,18 @@ function Create() {
   const handleSubmitGame = async (e) => {
     e.preventDefault();
 
-    if (!gameType.trim() || !selectedCategory || !selectedDifficultyLevel || !user || cards.length === 0) {
-        setError('Alla fält är obligatoriska, och minst ett kort måste associeras med spelet.');
+    if (!gameName.trim() || !gameType.trim() || !selectedCategory || !selectedDifficultyLevel || !userId || cards.length === 0) {
+        handleShowError('Alla fält är obligatoriska, och minst ett kort måste associeras med spelet.');
         return;
     }
 
     const gameData = {
+        name: gameName,
         categoryId: selectedCategory,
         difficultyLevelId: parseInt(selectedDifficultyLevel, 10),
         gameType: gameType,
-        createdBy: user.id,
+        createdBy: userId,
+        items: cards
     };
 
     const accessTokenString = localStorage.getItem('accessToken');
@@ -91,7 +93,7 @@ function Create() {
     const accessToken = accessTokenData ? accessTokenData.accessToken : null;
 
     if (!accessToken) {
-        setError('Ingen giltig access token hittades. Vänligen logga in igen.');
+        handleShowError('Ingen giltig access token hittades. Vänligen logga in igen.');
         navigate('/login');
         return;
     }
@@ -108,41 +110,14 @@ function Create() {
 
         if (!response.ok) {
             const errorText = await response.text();
-            setError(`Fel vid skapande av spel: ${errorText}`);
+            handleShowError(`Fel vid skapande av spel: ${errorText}`);
             return;
-        }
-
-        const responseData = await response.json();
-        const createdGameId = responseData.id || responseData.Id;
-
-        if (!createdGameId) {
-            setError('Misslyckades med att hämta spel-ID. Vänligen försök igen.');
-            return;
-        }
-
-        const updatedCards = cards.map(card => ({ ...card, gameId: createdGameId }));
-
-        for (const card of updatedCards) {
-            const itemResponse = await fetch('https://localhost:7259/api/Item/AddItem', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`,
-                },
-                body: JSON.stringify(card),
-            });
-
-            if (!itemResponse.ok) {
-                const itemErrorText = await itemResponse.text();
-                setError(`Fel vid postning av kort: ${itemErrorText}`);
-                return;
-            }
         }
 
         navigate('/games');
 
     } catch (error) {
-        setError(`Fel vid skapande av spel: ${error.message}`);
+        handleShowError(`Fel vid skapande av spel: ${error.message}`);
     }
   };
 
@@ -160,6 +135,16 @@ function Create() {
       </div>
 
       <form onSubmit={handleSubmitGame} className="form-section">
+        <label>
+          Spelnamn:
+          <input 
+            placeholder='Skirv namn på spel här...'
+            type="text" 
+            value={gameName} 
+            onChange={(e) => setGameName(e.target.value)} 
+            required 
+          />
+        </label>
         <label>
           Speltyp:
           <select value={gameType} onChange={(e) => setGameType(e.target.value)}>
@@ -197,7 +182,6 @@ function Create() {
           </select>
         </label>
         <button type="submit" className="btn btn-success">Skapa spel</button>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
       </form>
 
       <ItemPopupModal 
@@ -211,6 +195,20 @@ function Create() {
         handleClose={closeCategoryModal} 
         handleSave={handleSaveCategory} 
       />
+
+      <Modal show={showErrorModal} onHide={handleCloseError}>
+        <Modal.Header closeButton>
+          <Modal.Title>Fel</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {error}
+        </Modal.Body>
+        <Modal.Footer>
+          <button className="btn btn-secondary" onClick={handleCloseError}>
+            Stäng
+          </button>
+        </Modal.Footer>
+      </Modal>
 
       {cards.length > 0 && (
         <div className="card-list-container">
