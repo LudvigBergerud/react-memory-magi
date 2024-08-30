@@ -103,6 +103,7 @@ form button:hover {
     max-width: 50%;
     height: 122px; 
     overflow-x: auto; 
+    overflow-y:hidden;
     white-space: nowrap;
     padding: 10px;
     border-radius: 10px;

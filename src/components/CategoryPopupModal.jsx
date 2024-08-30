@@ -4,8 +4,19 @@ import { Modal, Button, Form } from 'react-bootstrap';
 const CategoryPopupModal = ({ show, handleClose, handleSave, category }) => {
     const [name, setName] = useState(category ? category.name : '');
     const [image, setImage] = useState(category ? category.image : '');
+    const [validated, setValidated] = useState(false);
 
-    const saveCategory = async () => {
+    const saveCategory = async (event) => {
+        const form = event.currentTarget;
+        if (form.checkValidity() === false) {
+            event.preventDefault();
+            event.stopPropagation();
+            setValidated(true);
+            return;
+        }
+
+        event.preventDefault();
+
         const categoryData = { name, image };
 
         const accessTokenString = localStorage.getItem('accessToken');
@@ -52,7 +63,7 @@ const CategoryPopupModal = ({ show, handleClose, handleSave, category }) => {
                 <Modal.Title>{category ? 'Redigera Kategori' : 'Skapa Kategori'}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Form>
+                <Form noValidate validated={validated} onSubmit={saveCategory}>
                     <Form.Group controlId="formCategoryName">
                         <Form.Label>Namn</Form.Label>
                         <Form.Control 
@@ -60,7 +71,11 @@ const CategoryPopupModal = ({ show, handleClose, handleSave, category }) => {
                             value={name} 
                             onChange={(e) => setName(e.target.value)} 
                             placeholder="Ange kategorinamn"
+                            required
                         />
+                        <Form.Control.Feedback type="invalid">
+                            Fyll i det här fältet.
+                        </Form.Control.Feedback>
                     </Form.Group>
                     <Form.Group controlId="formCategoryImage">
                         <Form.Label>Bild URL</Form.Label>
@@ -69,7 +84,11 @@ const CategoryPopupModal = ({ show, handleClose, handleSave, category }) => {
                             value={image} 
                             onChange={(e) => setImage(e.target.value)} 
                             placeholder="Ange bildens URL"
+                            required
                         />
+                        <Form.Control.Feedback type="invalid">
+                            Fyll i det här fältet.
+                        </Form.Control.Feedback>
                     </Form.Group>
                     <div className="category-preview">
                         <div className="category-card">
@@ -92,7 +111,7 @@ const CategoryPopupModal = ({ show, handleClose, handleSave, category }) => {
                 </Form>
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="primary" onClick={saveCategory}>
+                <Button variant="primary" type="submit" onClick={saveCategory}>
                     Spara Kategori
                 </Button>
             </Modal.Footer>
@@ -101,4 +120,3 @@ const CategoryPopupModal = ({ show, handleClose, handleSave, category }) => {
 };
 
 export default CategoryPopupModal;
-
