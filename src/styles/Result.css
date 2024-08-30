@@ -61,8 +61,7 @@
   color: #333;
 }
 
-.leaderboard-userID {
-  margin-right: 10px;
+.leaderboard-userName {
   font-weight: bold;
   color: #555;
 }
@@ -111,4 +110,7 @@
   margin: 1vh;
   width: 20vw;
   font-weight: bold !important;
+}
+.current-user-result {
+  background-color: gold;
 }
