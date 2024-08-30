@@ -19,13 +19,20 @@ function Create() {
 
   useEffect(() => {
     const accessTokenString = localStorage.getItem('accessToken');
-    const accessToken = accessTokenString ? JSON.parse(accessTokenString) : null;
+    const accessTokenData = accessTokenString ? JSON.parse(accessTokenString) : null;
+    const accessToken = accessTokenData ? accessTokenData.accessToken : null;
+
+    if (!accessToken) {
+      setError('Ingen giltig access token hittades. Vänligen logga in igen.');
+      navigate('/login');
+      return;
+    }
 
     fetch('https://localhost:7259/api/category/GetCategories', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        ...(accessToken && { 'Authorization': `Bearer ${accessToken}` }),
+        'Authorization': `Bearer ${accessToken}`,
       },
     }).then(response => response.json())
       .then(data => setCategories(data))
@@ -35,7 +42,7 @@ function Create() {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        ...(accessToken && { 'Authorization': `Bearer ${accessToken}` }),
+        'Authorization': `Bearer ${accessToken}`,
       },
     }).then(response => response.json())
       .then(data => {
@@ -47,7 +54,7 @@ function Create() {
       }).catch(error => {
         setError(`Fel vid hämtning av användare: ${error.message}`);
       });
-  }, []);
+  }, [navigate]);
 
   const handleSaveCard = (newCard) => {
     newCard.gameId = -1; 
@@ -80,14 +87,21 @@ function Create() {
     };
 
     const accessTokenString = localStorage.getItem('accessToken');
-    const accessToken = accessTokenString ? JSON.parse(accessTokenString) : null;
+    const accessTokenData = accessTokenString ? JSON.parse(accessTokenString) : null;
+    const accessToken = accessTokenData ? accessTokenData.accessToken : null;
+
+    if (!accessToken) {
+        setError('Ingen giltig access token hittades. Vänligen logga in igen.');
+        navigate('/login');
+        return;
+    }
 
     try {
         const response = await fetch('https://localhost:7259/api/game/PostGameWithId', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                ...(accessToken && { 'Authorization': `Bearer ${accessToken}` }),
+                'Authorization': `Bearer ${accessToken}`,
             },
             body: JSON.stringify(gameData),
         });
@@ -113,7 +127,7 @@ function Create() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    ...(accessToken && { 'Authorization': `Bearer ${accessToken}` }),
+                    'Authorization': `Bearer ${accessToken}`,
                 },
                 body: JSON.stringify(card),
             });
@@ -130,7 +144,7 @@ function Create() {
     } catch (error) {
         setError(`Fel vid skapande av spel: ${error.message}`);
     }
-};
+  };
 
   const openModal = () => setShowModal(true);
   const closeModal = () => setShowModal(false);
