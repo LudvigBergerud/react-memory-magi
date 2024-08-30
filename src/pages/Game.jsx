@@ -18,7 +18,7 @@ function Game() {
   let gameId= gameData?.gameId; //Denna behöver routas in beroende på vilket spel användare väljer
   let difficulty =gameData?.difficultyLevel; // Samma som ovan, routas in från quiz home page sidan, tillfällig variabel.
   let userId ="new_user_id"; //samma som ovan, tillfällig variabel
- // console.log(location);
+ // console.log(location.state);
   //console.log(gameData);
 //console.log("Objekt från HOME:"+gameData + JSON.stringify(gameData));
 //console.log(categoryId);
@@ -27,7 +27,8 @@ const accessTokenString = localStorage.getItem("accessToken");
 const accessToken = accessTokenString ? JSON.parse(accessTokenString) : null;
 
 useEffect(() => {
-  if (items.length === 0) {
+  if (items.length === 0 && isRunning === false) {
+    EndGame();
     console.log("The list is now empty.");
     // You can perform any other actions here, e.g., show a victory message, reset the game, etc.
   }
@@ -124,7 +125,7 @@ console.log("kortid-:"+id)
 
         console.log("Korten matchar");
         setIsRunning(false);
-        EndGame();
+        
         setTimeout(() => {
           setNewflipState({});
           setList([]);

@@ -25,7 +25,8 @@ function Home() {
       [index]: {
         id: game.Id,
         difficulty: game.DifficultyLevel,
-        gameName: `${game.DifficultyLevel} - ${game.Id}`
+        name: game.Name,
+        gameName: `${game.DifficultyLevel} - ${game.Name}`
         
         
       }
@@ -52,8 +53,8 @@ function Home() {
       });
   }, []);
 
-  const startGame= (categoryObj,level) =>{
-    var gameData = {gameId:categoryObj, difficultyLevel:level
+  const startGame= (categoryObj,level,gameName) =>{
+    var gameData = {gameId:categoryObj, difficultyLevel:level,name:gameName
     }
     navigate("/Game", { state: {gameData}});
 
@@ -106,7 +107,7 @@ function Home() {
         })
         .map((game) =>(
             <Dropdown.Item   key={game.Id}  href="#" onClick={() => handleSelect(game,index)}>
-              {game.DifficultyLevel} - {game.Id}
+              {game.DifficultyLevel} - {game.Name}
             
       
           </Dropdown.Item>
@@ -117,7 +118,7 @@ function Home() {
       </Dropdown>
        
        <a onClick={
-        () => startGame(selectedGames[index].id, selectedGames[index].difficulty)} className="btn btn-primary">Starta spel</a>
+        () => startGame(selectedGames[index].id, selectedGames[index].difficulty,selectedGames[index].name)} className="btn btn-primary">Starta spel</a>
      </div>
    </div>
  
