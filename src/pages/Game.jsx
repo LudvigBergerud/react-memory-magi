@@ -1,5 +1,5 @@
 import React, {useState,useEffect, useRef} from 'react'
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, Link,useNavigate } from 'react-router-dom';
 import cardback from '../assets/cardBack.png'
 import cardFront from '../assets/cardFront.png'
 import './Game.css'
@@ -8,23 +8,33 @@ function Game() {
   const location = useLocation();
   const { gameData } = location.state || {};
   const [items, setItems] = useState([]);
-  const [UserItems, setUserItems] = useState([]);
   const [flippedcards, setNewflipState] = useState({});
   const [listOfFlippedCards, setList] = useState([]);
   const [time, setTime] = useState(0);
+  const [resultTime, setResultTime] =useState(0);
+  const navigate = useNavigate();
+  const [isRunning, setIsRunning] = useState(true);
 
-  let categoryId= gameData?.category.id; //Denna behöver routas in beroende på vilket spel användare väljer
+  let gameId= gameData?.gameId; //Denna behöver routas in beroende på vilket spel användare väljer
   let difficulty =gameData?.difficultyLevel; // Samma som ovan, routas in från quiz home page sidan, tillfällig variabel.
   let userId ="new_user_id"; //samma som ovan, tillfällig variabel
+ // console.log(location.state);
+  //console.log(gameData);
+//console.log("Objekt från HOME:"+gameData + JSON.stringify(gameData));
+//console.log(categoryId);
 
-console.log("Objekt från HOME:"+gameData + JSON.stringify(gameData));
-console.log(categoryId);
-const DifficultyEnum =
-{
-  Easy:2,
-  Medium:3,
-  Hard:4
-}
+const accessTokenString = localStorage.getItem("accessToken");
+const accessToken = accessTokenString ? JSON.parse(accessTokenString) : null;
+
+useEffect(() => {
+  if (items.length === 0 && isRunning === false) {
+    EndGame();
+    console.log("The list is now empty.");
+    // You can perform any other actions here, e.g., show a victory message, reset the game, etc.
+  }
+}, [items]);
+
+
 
   const handleFlip = (id,index) => {
 console.log("kortid-:"+id)
@@ -46,35 +56,31 @@ console.log("kortid-:"+id)
     }));
   };
 
-  useEffect(() => {
-    fetch(`https://localhost:7259/api/UserItem?userId=${userId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("useritems:" + data);
-        setUserItems(data);
-      });
-  }, []);
+
+
+
 
   //Hämta korten från en specifik kategori
   useEffect(() => {
+    const accessTokenString = localStorage.getItem("accessToken");
+    const accessToken = accessTokenString ? JSON.parse(accessTokenString) : null;
+  
+
     const fetchData = async () => {
-      await fetch("https://localhost:7259/api/Item")
+      await fetch(`https://localhost:7259/api/Item/GettItemFromGameId?gameid=${gameId}`, {
+        headers: {
+          Authorization: accessToken ? `Bearer ${accessToken}` : "",
+        },
+      })
         .then((res) => res.json())
         .then((data) => {
-          //filtrera ut rätt kategori och kolla vilken svårighetgrad = antal kort
-          var filtereditems = data
-            .filter((item) => item.categoryId === categoryId)
-            .slice(0, DifficultyEnum[difficulty]);
-          console.log(filtereditems, UserItems);
-          filtereditems = filtereditems.filter(
-            (item) => !UserItems.includes(item.id)
-          );
-          console.log(filtereditems);
+       
+      console.log(data);
           //Duplicera listan då vi behöver ha 2 kort av varje för memory
-          const deepCopiedItems = filtereditems.map((item) =>
+          const deepCopiedItems = data.map((item) =>
             JSON.parse(JSON.stringify(item))
           );
-          const doubledItems = [...filtereditems, ...deepCopiedItems];
+          const doubledItems = [...data, ...deepCopiedItems];
           //Shuffla listan
           for (var i = doubledItems.length - 1; i > 0; i--) {
             var j = Math.floor(Math.random() * (i + 1));
@@ -83,19 +89,27 @@ console.log("kortid-:"+id)
             doubledItems[j] = temp;
           }
           setItems(doubledItems);
+          console.log(doubledItems);
         });
     };
     fetchData();
-  }, [UserItems]);
+  }, []);
 
   useEffect(() => {
-    let interval;
+    if(isRunning)
+    {
+      let interval;
 
-    interval = setInterval(() => {
-      setTime((prevTime) => prevTime + 10);
-    }, 10);
-
-    return () => clearInterval(interval);
+      interval = setInterval(() => {
+        setTime((prevTime) => prevTime + 10);
+      }, 10);
+  
+      return () => clearInterval(interval);
+    }
+    else{
+      return
+    }
+ 
   });
 
   //Denna är aktiv hela tiden och kollar hur många kort som är klickade just nu.
@@ -108,7 +122,20 @@ console.log("kortid-:"+id)
       console.log("andra" + secondCard);
 
       if (firstCard === secondCard) {
+
         console.log("Korten matchar");
+        setIsRunning(false);
+        
+        setTimeout(() => {
+          setNewflipState({});
+          setList([]);
+        }, 2250);
+        //väntar lite till då animation av flippningen sker
+        setTimeout(() => {
+          setItems(prevItems => prevItems.filter(item => item.id !== firstCard))
+        }, 2900);
+      
+        
       } else {
         //resetta alla kort om det inte var en match
         setTimeout(() => {
@@ -119,10 +146,23 @@ console.log("kortid-:"+id)
     }
   }, [flippedcards]);
 
+  const EndGame= () =>{
+    const minutes = String(Math.floor((time / 60000) % 60)).slice(-2)
+    const seconds = String(Math.floor((time % 60000) / 1000)).slice(-2);
+
+    var timeResult= `${minutes}:${seconds}`;
+
+    var ResultData = {gameId:gameId,time:timeResult
+    }
+    console.log(ResultData);
+    navigate("/Result", { state: {ResultData}});
+
+
+  }
+
   return (
     <div className="container">
        <div className='text-center'>
-          <h1>{gameData.category.name}</h1>
         </div>
       <div className='d-flex justify-content-between align-items-center'>
       <div className="flex-grow-1 d-flex justify-content-center" >
