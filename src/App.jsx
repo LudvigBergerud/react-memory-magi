@@ -16,6 +16,8 @@ import Profile from "./pages/Profile";
 import Footer from "./components/Footer";
 import AboutUs from "./pages/AboutUs";
 import FAQ from "./pages/FAQ";
+import RegisterNewUser from "./components/Register";
+import Create from "./pages/Create";
 
 function App() {
   return (
@@ -54,6 +56,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            }
+          />
+           <Route
+            path="/create"
+            element={
+              <ProtectedRoute>
+                <Create />
               </ProtectedRoute>
             }
           />

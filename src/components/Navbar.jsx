@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import "../styles/Navbar.css";
 import { NavLink, useNavigate } from "react-router-dom";
 
@@ -29,7 +29,7 @@ function Navbar() {
     } else {
       /* TODO: IMPLEMENT ERROR HANDLING. */
     }
-  }, [fetchHandler.response]);
+  }, [fetchHandler.response, authHandler, navigate]);
 
   return (
     <>
@@ -37,13 +37,12 @@ function Navbar() {
       {authHandler.isAuthenticated ? (
         <div id="nav-container">
           <div id="brand-wrapper">
-            <NavLink to="Home">
-              {" "}
+            <NavLink to="/home">
               <House className="icon" /> <span>Hem</span>
             </NavLink>
           </div>
           <div id="navlinks-wrapper">
-            <NavLink to="#">
+            <NavLink to="/create">
               <PlusLg className="icon" />
               <span>Skapa spel</span>
             </NavLink>
