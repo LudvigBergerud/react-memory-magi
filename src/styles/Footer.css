@@ -1,11 +1,7 @@
 #footer-container {
   background-color: transparent;
-  height: 7.5vh;
-  position: absolute;
+  min-height: 7.5vh;
   width: 100%;
-  right: 0;
-  left: 0;
-  bottom: 0;
   align-items: center;
   display: grid;
   padding-left: 0.5rem;
@@ -14,9 +10,14 @@
   color: #202b8a;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
+  margin-top: auto;
 }
 #footer-container * {
   margin-bottom: 0;
+}
+
+#footer-wrapper {
+  width: 100vw;
 }
 
 #footer-container a {
@@ -40,4 +41,14 @@
 
 #footer-container a:hover {
   color: #ff9033;
+}
+@media (max-width: 700px) {
+  #footer-links-wrapper {
+    flex-direction: column;
+    align-items: end;
+    justify-content: flex-start;
+  }
+  #footer-links-wrapper a {
+    margin: 10px;
+  }
 }

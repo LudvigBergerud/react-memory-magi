@@ -1,6 +1,7 @@
 import React, { useContext, useEffect } from "react";
 import "../styles/Navbar.css";
 import { NavLink, useNavigate } from "react-router-dom";
+import { Dropdown } from "react-bootstrap";
 
 import useFetch from "../hooks/useFetch";
 
@@ -9,9 +10,11 @@ import {
   PlusLg,
   BoxArrowRight,
   PersonCircle,
+  List,
 } from "react-bootstrap-icons";
 
 import { AuthContext } from "../contexts/AuthProvider";
+import { NavDropdown } from "react-bootstrap";
 
 function Navbar() {
   const authHandler = useContext(AuthContext);
@@ -34,30 +37,53 @@ function Navbar() {
   return (
     <>
       {/* TODO: IMPLEMENT ERROR HANDLING. */}
-      {authHandler.isAuthenticated ? (
-        <div id="nav-container">
-          <div id="brand-wrapper">
-            <NavLink to="/home">
-              <House className="icon" /> <span>Hem</span>
-            </NavLink>
-          </div>
-          <div id="navlinks-wrapper">
-            <NavLink to="/create">
-              <PlusLg className="icon" />
-              <span>Skapa spel</span>
-            </NavLink>
-            <NavLink to="/profile">
-              <PersonCircle />
-              <span>Profil</span>
-            </NavLink>
-            <a onClick={handleLogOut}>
-              <BoxArrowRight className="icon" /> <span>Logga ut</span>
-            </a>
-          </div>
+      <div id="nav-container" className="fixed-top">
+        <div id="brand-wrapper">
+          <NavLink to="Home">
+            {" "}
+            <House className="icon" /> <span>Hem</span>
+          </NavLink>
         </div>
-      ) : (
-        ""
-      )}
+        {authHandler.isAuthenticated ? (
+          <>
+            {" "}
+            <div id="navlinks-wrapper">
+              <NavLink to="/create">
+                <PlusLg className="icon" />
+                <span>Skapa spel</span>
+              </NavLink>
+              <NavLink to="/profile">
+                <PersonCircle />
+                <span>Profil</span>
+              </NavLink>
+              <a onClick={handleLogOut}>
+                <BoxArrowRight className="icon" /> <span>Logga ut</span>
+              </a>
+            </div>
+            <Dropdown id="navbar-dropdown">
+              <Dropdown.Toggle id="dropdown-toggle">Meny</Dropdown.Toggle>
+              <Dropdown.Menu>
+                <Dropdown.Item href="/create">
+                  {" "}
+                  <PlusLg className="icon" />
+                  Skapa spel
+                </Dropdown.Item>
+                <Dropdown.Item href="/profile">
+                  {" "}
+                  <PersonCircle />
+                  Profil
+                </Dropdown.Item>
+                <Dropdown.Item onClick={handleLogOut}>
+                  <BoxArrowRight />
+                  Logga ut
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+          </>
+        ) : (
+          ""
+        )}
+      </div>
     </>
   );
 }
