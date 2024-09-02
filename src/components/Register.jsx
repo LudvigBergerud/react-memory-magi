@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import usePost from "../hooks/usePost";
+import useFetch from "../hooks/useFetch";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthProvider";
 import Alerts from "../components/Alerts";
