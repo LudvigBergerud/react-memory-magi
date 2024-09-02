@@ -164,16 +164,20 @@ function Profile() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const accessTokenString = localStorage.getItem("accessToken");
-      const accessToken = accessTokenString
-        ? JSON.parse(accessTokenString)
+      // Retrieve the stored token object from localStorage
+      const tokenObjectString = localStorage.getItem("accessToken");
+      const tokenObject = tokenObjectString
+        ? JSON.parse(tokenObjectString)
         : null;
+
+      // Access the actual string token from the object...
+      const accessToken = tokenObject?.accessToken;
 
       const response = await fetch("https://localhost:7259/api/Users/user", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+          Authorization: `Bearer ${accessToken}`,
         },
       });
 
@@ -186,7 +190,7 @@ function Profile() {
         setEmail(data.email);
         setUserName(data.userName);
       } else {
-        // Handle the case where the response isn't ok (optional)
+        console.log("Error fetching user: ", response.error);
         setUser(null);
       }
     };

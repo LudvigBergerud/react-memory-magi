@@ -3,38 +3,219 @@ import { useLocation } from "react-router-dom";
 import "../styles/Result.css";
 import star from "../assets/Mario-Star.png";
 
-const sampleLeaderboard = [
-  { userID: "Glittrande_troll", time: "10:32" },
-  { userID: "Stjärnprinsessa", time: "08:55" },
-  { userID: "Mystisk_drake", time: "09:12" },
-  { userID: "Magisk_fenix", time: "13:22" },
-  { userID: "Sagolejon", time: "02:30" },
-  { userID: "Lysande_fågel", time: "05:22" },
-  { userID: "Skogsälva", time: "06:18" },
-  { userID: "Morgondagg", time: "07:40" },
-  { userID: "Stjärnkloka", time: "03:45" },
-  { userID: "Nattens_herre", time: "04:05" },
-  { userID: "Förtrollad_kanin", time: "02:09" },
-  { userID: "Ljusets_häxa", time: "01:14" },
-  { userID: "Drömtrollkarlen", time: "01:20" },
-  { userID: "Skymnings_väktare", time: "11:47" },
-];
-
 function Result() {
   const location = useLocation();
-  const data = location.state?.data;
+  const data = location.state?.data || { gameId: 1, time: "00:15:55" }; //Remove when we get data from game
 
-  const [leaderboard, setLeaderboard] = useState(sampleLeaderboard);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [sortedLeaderboard, setSortedLeaderboard] = useState(leaderboard);
+  const [user, setUser] = useState(null);
+  const [users, setUsers] = useState(null);
+  const [placementNumber, setPlacementNumber] = useState(0);
 
   useEffect(() => {
-    // Sort leaderboard by time (in format "mm:ss") Might change later
-    const sortedLeaderboard = [...leaderboard].sort((a, b) => {
-      const [aMin, aSec] = a.time.split(":").map(Number);
-      const [bMin, bSec] = b.time.split(":").map(Number);
-      return aMin * 60 + aSec - (bMin * 60 + bSec);
-    });
-    setLeaderboard(sortedLeaderboard);
+    const fetchUser = async () => {
+      // Retrieve the stored token object from localStorage
+      const tokenObjectString = localStorage.getItem("accessToken");
+      const tokenObject = tokenObjectString
+        ? JSON.parse(tokenObjectString)
+        : null;
+
+      // Access the actual string token from the object...
+      const accessToken = tokenObject?.accessToken;
+
+      const response = await fetch("https://localhost:7259/api/Users/user", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (response.ok) {
+        const data =
+          response.headers.get("Content-Length") !== "0"
+            ? await response.json()
+            : {};
+        await setUser(data);
+      } else {
+        console.error("Error fetching user: ", response.error);
+        await setUser(null);
+      }
+    };
+
+    fetchUser();
   }, []);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      // Retrieve the stored token object from localStorage
+      const tokenObjectString = localStorage.getItem("accessToken");
+      const tokenObject = tokenObjectString
+        ? JSON.parse(tokenObjectString)
+        : null;
+
+      // Access the actual string token from the object...
+      const accessToken = tokenObject?.accessToken;
+
+      const response = await fetch("https://localhost:7259/api/Users/users", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (response.ok) {
+        const data =
+          response.headers.get("Content-Length") !== "0"
+            ? await response.json()
+            : {};
+        await setUsers(data);
+      } else {
+        console.error("Error fetching user: ", response.error);
+        await setUsers(null);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      // Retrieve the stored token object from localStorage
+      const tokenObjectString = localStorage.getItem("accessToken");
+      const tokenObject = tokenObjectString
+        ? JSON.parse(tokenObjectString)
+        : null;
+
+      // Access the actual string token from the object...
+      const accessToken = tokenObject?.accessToken;
+
+      const response = await fetch(
+        "https://localhost:7259/api/Result/GetAllResults",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data =
+          (await response.headers.get("Content-Length")) !== "0"
+            ? await response.json()
+            : [];
+
+        // Check if the data is an array
+        if (Array.isArray(data) && data.length > 0) {
+          // Specify the gameId you want to filter by
+          const gameId = 1; // Replace with the actual game ID you want to use
+
+          // Filter the fetched data to include only results for the specified game
+          const gameData = await data.filter((r) => r.gameId === gameId);
+
+          // Initialize an empty object to keep track of the best (lowest) time for each user
+          const leaderboardMap = {};
+
+          // Process each result from the filtered game data
+          gameData.forEach((result) => {
+            const { userId, time } = result;
+
+            // Convert the time string to seconds for easy comparison
+            const timeInSeconds = timeToSeconds(time);
+
+            // Check if the user already has an entry in the leaderboard map
+            // And the time is better than the stored entry
+            if (
+              !leaderboardMap[userId] ||
+              timeInSeconds < leaderboardMap[userId]
+            ) {
+              // Update the leaderboard map with the lower time
+              leaderboardMap[userId] = timeInSeconds;
+            }
+          });
+
+          // Convert the leaderboard map to an array of objects for easier use
+          const leaderboardArray = Object.keys(leaderboardMap).map(
+            (userId) => ({
+              userId,
+              time: secondsToTime(leaderboardMap[userId]),
+            })
+          );
+
+          // Update the state with the processed leaderboard data
+          await setLeaderboard(leaderboardArray);
+        } else {
+          console.error("Unexpected data format or empty data array");
+        }
+      } else {
+        // Log an error if the response was not successful
+        console.error("Failed to get all results: ", response.error);
+      }
+    };
+
+    fetchData();
+  }, [user]);
+
+  useEffect(() => {
+    // Sort leaderboard by time (in format "hh:mm:ss")
+    const sortedLeaderboard = [...leaderboard].sort((a, b) => {
+      // Convert times to seconds for comparison
+      const aSeconds = timeToSeconds(a.time);
+      const bSeconds = timeToSeconds(b.time);
+
+      return aSeconds - bSeconds; // Sort in ascending order
+    });
+
+    setSortedLeaderboard(sortedLeaderboard);
+  }, [leaderboard]);
+
+  //Converts HH:MM:SS to seconds
+  function timeToSeconds(timeStr) {
+    const [hours, minutes, seconds] = timeStr.split(":").map(Number);
+    return hours * 3600 + minutes * 60 + seconds;
+  }
+
+  //Converts seconds back to HH:MM:SS
+  function secondsToTime(seconds) {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+      2,
+      "0"
+    )}:${String(secs).padStart(2, "0")}`;
+  }
+
+  function getUsernameFromId(id) {
+    if (users) {
+      const user = users.find((u) => u.userId === id);
+      return user.userName;
+    }
+    return "Please reload the page";
+  }
+
+  useEffect(() => {
+    if (user) {
+      let counter = 1;
+      // Find the placement number based on the userId
+      sortedLeaderboard.forEach((entry) => {
+        if (entry.userId === user.userId) {
+          setPlacementNumber(counter);
+          return;
+        }
+        counter++;
+      });
+      // If the id is not found, placementNumber is set to 0
+      if (counter > sortedLeaderboard.length) {
+        console.log(counter, sortedLeaderboard.length);
+        setPlacementNumber(0);
+      }
+    }
+  }, [sortedLeaderboard, user]);
 
   return (
     <>
@@ -44,17 +225,42 @@ function Result() {
           <p className="result-time-text">
             Du klarade det på tiden: {data ? JSON.stringify(data.time) : ""}
           </p>
-          <p>Du slog personligt rekord! </p>
-          <p>Du är nu på plats [] i världen!</p>
+          <p>
+            {placementNumber != 0
+              ? "Du är top " + placementNumber + " i världen!"
+              : ""}{" "}
+          </p>
           <p className="leaderboard-title">TOPPLISTA</p>
+
           <div className="leaderboard-box">
-            {leaderboard.map((entry, index) => (
-              <div key={index} className="leaderboard-entry">
-                <span className="leaderboard-rank">{index + 1}. </span>
-                <span className="leaderboard-userID">{entry.userID} </span>
-                <span className="leaderboard-time">{entry.time}</span>
-              </div>
-            ))}
+            {sortedLeaderboard.map((entry, index) => {
+              // Determine if the entry's userID matches the current user's userID
+              if (user) {
+                const isCurrentUser = entry.userId === user.userId;
+
+                const entryUserName = getUsernameFromId(entry.userId);
+                // Dynamically set the class name based on the condition
+                const entryClass = isCurrentUser
+                  ? "leaderboard-entry current-user-result"
+                  : "leaderboard-entry";
+
+                return (
+                  <div key={index} className={entryClass}>
+                    <span className="leaderboard-rank">{index + 1}. </span>
+                    <span className="leaderboard-userName">
+                      {entryUserName}
+                    </span>
+                    <span className="leaderboard-time">{entry.time}</span>
+                  </div>
+                );
+              } else {
+                return (
+                  <div className="leaderboard-entry">
+                    <h1>Loading leaderboard...</h1>
+                  </div>
+                );
+              }
+            })}
           </div>
           <div className="result-btn-box">
             <button className="btn-play-again btn btn-success">
