@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import "../styles/LandingPage.css";
 
-function Alerts({ alert }) {
+function Alerts({ alert, resetAlert }) {
   const [fade, setFade] = useState(false);
 
   useEffect(() => {
@@ -12,14 +12,13 @@ function Alerts({ alert }) {
       // ta bort efter 2,5 sekunder
       const fadeTimer = setTimeout(() => {
         setFade(false);
-        // debugger;
       }, 2500);
 
       return () => {
         clearTimeout(fadeTimer);
       };
     }
-  }, [alert]);
+  }, [alert, resetAlert]);
 
   const alertColor = {
     margin: "10px",
@@ -31,11 +30,7 @@ function Alerts({ alert }) {
     backgroundColor: "#2196F3",
   };
 
-  if (!alert) {
-    return null;
-  }
-
-  return <div style={alertColor}>{alert.text}</div>;
+  return <div style={alertColor}>{alert}</div>;
 }
 
 export default Alerts;

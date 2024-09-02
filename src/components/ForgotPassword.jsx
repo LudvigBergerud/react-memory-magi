@@ -4,17 +4,15 @@ import Alerts from "../components/Alerts";
 function ForgotPassword({ toggleForgottModal }) {
   const [email, setEmail] = useState("");
   const [isModalClosedOrNot, setIsModalClosedOrNot] = useState(false);
-  const [alert, setAlert] = useState(null);
+  const [alert, setAlert] = useState("");
 
   const closeTheModalButton = () => {
     if (email.includes("@")) {
       toggleForgottModal(true);
       setIsModalClosedOrNot(true);
     } else {
-      setAlert({
-        // Sätt text: för varning
-        text: "Hey,din email saknar @. Försök igen!",
-      });
+      setAlert("Hey,din email saknar @. Försök igen!");
+      setTimeout(() => setAlert(""), 3000);
     }
   };
 
@@ -32,10 +30,12 @@ function ForgotPassword({ toggleForgottModal }) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            <Alerts alert={alert} />
+            {alert !== "" ? <Alerts alert={alert} /> : ""}
             <br />
             <br />
-            <button onClick={closeTheModalButton}>Begär hjälp</button>
+            <button className="roundButton" onClick={closeTheModalButton}>
+              Begär hjälp
+            </button>
           </div>
         </div>
       </div>
