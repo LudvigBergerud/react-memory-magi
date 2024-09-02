@@ -5,13 +5,15 @@ import usePost from "../hooks/usePost";
 import { AuthContext } from "../contexts/AuthProvider";
 import Alerts from "../components/Alerts";
 import ForgotPassword from "../components/ForgotPassword";
+import APIAlert from "../components/APIAlert";
 
 import "../styles/LandingPage.css";
 
 function Landingpage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [alert, setAlert] = useState(null);
+  const [alert, setAlert] = useState("");
+  const [alertAPI, setAlertAPI] = useState("");
   const navigate = useNavigate();
   const authHandler = useContext(AuthContext);
   const loginHandler = usePost();
@@ -46,21 +48,10 @@ function Landingpage() {
   };
 
   const handleLogIn = async () => {
-    var loginAttempt = await loginHandler.saveData(
-      "https://localhost:7259/login",
-      user,
-      "POST"
-    );
-
-    // Aktivera Alert component
-    if (loginAttempt !== 200) {
-      setAlert({
-        // Sätt text: för varning
-        text: "Hey, fel lösenord eller email. Försök igen!",
-      });
-
-      return;
-    }
+    //  var loginAttempt =
+    setAlert("");
+    setAlertAPI("");
+    await loginHandler.saveData("https://localhost:7259/login", user, "POST");
   };
 
   // om lyckad == ge token och då syns navbar etc och skicka user till /home
@@ -71,8 +62,31 @@ function Landingpage() {
     }
   }, [loginHandler.data]);
 
+  useEffect(() => {
+    console.log(loginHandler.error);
+    console.log(loginHandler.response);
+    if (loginHandler.error !== null) {
+      setAlertAPI(
+        "Vi ber om ursäkt, vi har problem med våra servrar. Vi håller på och undersöker detta!"
+      );
+    }
+  }, [loginHandler.error]);
+
+  useEffect(() => {
+    console.log(loginHandler.response);
+
+    if (loginHandler.response.status === 401) {
+      setAlert("Hey, fel lösenord eller email. Försök igen!");
+    }
+  }, [loginHandler.response]);
+
   return (
     <>
+      <div className="videoBackground">
+        <video autoPlay loop muted playsInline>
+          <source src="../mm_video_konfe.mp4" type="video/mp4" />
+        </video>
+      </div>
       <div>
         <div className="moveUP">
           <div className="centerMenu">
@@ -98,21 +112,21 @@ function Landingpage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
-                {/* Gör Register till en Component */}
                 <br />
                 <br />
-                <button onClick={toggleSignUpModal}>Skapa konto</button>{" "}
-                <button onClick={handleLogIn}>Logga in</button>
-                <Alerts alert={alert} />
+                <button className="roundButton" onClick={toggleSignUpModal}>
+                  Skapa konto
+                </button>{" "}
+                <button className="roundButton" onClick={handleLogIn}>
+                  Logga in
+                </button>
+                {alert !== "" ? <Alerts alert={alert} /> : ""}
+                {alertAPI !== "" ? <APIAlert alert={alertAPI} /> : ""}
                 <br />
                 <br />
-                <button
-                  className="forgotInfoButton"
-                  onClick={toggleForgottPassword}
-                >
+                <button className="roundButton" onClick={toggleForgottPassword}>
                   Glömt lösenord?{" "}
                 </button>
-                {/* <ForgotPassword></ForgotPassword> */}
               </div>
             </div>
           </div>
@@ -126,7 +140,7 @@ function Landingpage() {
                   toggleModal={toggleSignUpModal}
                   onRegister={confirmRegister}
                 />
-                <button onClick={toggleSignUpModal}>X</button>{" "}
+                <br />
               </div>
             </div>
           )}

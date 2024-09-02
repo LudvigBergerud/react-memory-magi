@@ -4,7 +4,7 @@ import useLocalStorage from "./useLocalStorage";
 
 function usePost(url, obj, method) {
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(null);
   const [response, setResponse] = useState({});
   const [data, setData] = useState(null);
   const localStorageHandler = useLocalStorage();
@@ -29,16 +29,18 @@ function usePost(url, obj, method) {
   async function saveData(url, obj, method) {
     const options = await createOptions(obj, method);
     console.log(options);
-    setError("");
+    setError(null);
     setData(null);
     try {
       setLoading(true);
       const apiResponse = await fetch(url, options);
+      console.log(apiResponse);
       setResponse(apiResponse);
       const data = await apiResponse.json();
       setData(data);
     } catch (err) {
-      setError(new String(err));
+      setError(String(err)); // new
+      console.log(err);
     } finally {
       setLoading(false);
     }

@@ -4,39 +4,42 @@ import { Link } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthProvider";
 import Alerts from "../components/Alerts";
 
+import APIAlert from "../components/APIAlert";
+
 // hämta onRegister från LandingPage
 function RegisterNewUser({ toggleModal }) {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const createNewUser = usePost();
-  const [alert, setAlert] = useState(null);
+  const [alert, setAlert] = useState("");
+  const [alertAPI, setAlertAPI] = useState("");
 
   const Register = async () => {
-    // lägg till username för register senare
-    const userData = {
-      username,
-      email,
-      password,
-    };
+    const userData = { username, email, password };
 
-    if (username === "" && email === "" && password === "") {
-      setAlert({
-        text: "Hey, du saknar antingen en stor bokstav, liten eller något tecken i din registrering",
-      });
+    setTimeout(() => setAlert(""), 3000);
+
+    if (username.length <= 3 || !email.includes("@") || password.length <= 5) {
+      setAlert(
+        "Hey, du saknar antingen en stor bokstav, liten eller något tecken i din registrering"
+      );
+      return;
+    }
+
+    await createNewUser.saveData(
+      "https://localhost:7259/api/Users/register",
+      userData,
+      "POST"
+    );
+
+    if (createNewUser.response.status === 200) {
+      console.log(createNewUser.response);
+      toggleModal();
     } else {
-      // POST:a / skapa ny user till Db
-      await createNewUser
-        .saveData("https://localhost:7259/api/Users/register", userData, "POST")
-
-        .then((response) => {
-          //debugger;
-          if (response !== null) {
-            toggleModal();
-          } else {
-            console.error("Registrering failed");
-          }
-        });
+      setAlertAPI(
+        "Vi ber om ursäkt, vi har problem med våra servrar. Vi håller på och undersöker detta!"
+      );
     }
   };
 
@@ -64,8 +67,11 @@ function RegisterNewUser({ toggleModal }) {
         />
         <br />
         <br />
-        <button onClick={Register}>Registrera</button>
-        <Alerts alert={alert} />
+        <button className="roundButton" onClick={Register}>
+          Registrera
+        </button>
+        {alert !== "" ? <Alerts alert={alert} /> : ""}
+        {alertAPI !== "" ? <APIAlert alert={alertAPI} /> : ""}
       </div>
       <div></div>
     </>
