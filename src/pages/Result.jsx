@@ -226,7 +226,7 @@ function Result() {
             Du klarade det på tiden: {data ? JSON.stringify(data.time) : ""}
           </p>
           <p>
-            {placementNumber != 0
+            {placementNumber !== 0
               ? "Du är top " + placementNumber + " i världen!"
               : ""}{" "}
           </p>
@@ -255,7 +255,7 @@ function Result() {
                 );
               } else {
                 return (
-                  <div className="leaderboard-entry">
+                  <div key={index} className="leaderboard-entry">
                     <h1>Loading leaderboard...</h1>
                   </div>
                 );
