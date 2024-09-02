@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import RegisterNewUser from "../components/Register";
 import { useNavigate } from "react-router-dom";
 import useFetch from "../hooks/useFetch";
+
 import { AuthContext } from "../contexts/AuthProvider";
 import Alerts from "../components/Alerts";
 import ForgotPassword from "../components/ForgotPassword";
@@ -29,7 +30,7 @@ function Landingpage() {
     password: "",
   });
 
-  // Hämta objekt från RegisterNewUser component till createUser
+  // Hämta objekt från RegisterNewUser component till createUser d
   const confirmRegister = (createUser) => {
     setnewUser(createUser);
     console.log("Ny user: ", createUser);
@@ -51,7 +52,7 @@ function Landingpage() {
     //  var loginAttempt =
     setAlert("");
     setAlertAPI("");
-    await loginHandler.saveData("https://localhost:7259/login", user, "POST");
+    await loginHandler.handleData("https://localhost:7259/login", "POST", user);
   };
 
   // om lyckad == ge token och då syns navbar etc och skicka user till /home
@@ -65,6 +66,7 @@ function Landingpage() {
   useEffect(() => {
     console.log(loginHandler.error);
     console.log(loginHandler.response);
+
     if (loginHandler.error !== null) {
       setAlertAPI(
         "Vi ber om ursäkt, vi har problem med våra servrar. Vi håller på och undersöker detta!"

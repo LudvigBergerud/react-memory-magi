@@ -11,7 +11,7 @@ function RegisterNewUser({ toggleModal }) {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const createNewUser = usePost();
+  const createNewUser = useFetch();
   const [alert, setAlert] = useState("");
   const [alertAPI, setAlertAPI] = useState("");
 
@@ -27,10 +27,10 @@ function RegisterNewUser({ toggleModal }) {
       return;
     }
 
-    await createNewUser.saveData(
+    await createNewUser.handleData(
       "https://localhost:7259/api/Users/register",
-      userData,
-      "POST"
+      "POST",
+      userData
     );
 
     if (createNewUser.response.status === 200) {
