@@ -8,15 +8,14 @@ function Result() {
   const location = useLocation();
   const data = location.state?.data
     ? location.state.data
-    : { gameId: 1, time: "99:99:99" }; //Default if someone didnt get time from game or went to result with URL
+    : { result: { id: 1 } }; //Default if someone didnt get time from game or went to result with URL
 
-  const [leaderboard, setLeaderboard] = useState([]);
-  const [sortedLeaderboard, setSortedLeaderboard] = useState(leaderboard);
+  const [sortedLeaderboard, setSortedLeaderboard] = useState([]);
   const [user, setUser] = useState(null);
-  const [users, setUsers] = useState(null);
+  const [time, setTime] = useState(null);
   const [placementNumber, setPlacementNumber] = useState(0);
+
   const fetchUserHandler = useFetch();
-  const fetchUsersHandler = useFetch();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -36,23 +35,6 @@ function Result() {
   }, [fetchUserHandler.data]);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      await fetchUsersHandler.handleData(
-        "https://localhost:7259/api/Users/users",
-        "GET"
-      );
-    };
-    fetchUser();
-  }, []);
-
-  useEffect(() => {
-    console.log(fetchUsersHandler.data);
-    if (fetchUsersHandler.data) {
-      setUsers(fetchUsersHandler.data);
-    }
-  }, [fetchUsersHandler.data]);
-
-  useEffect(() => {
     const fetchData = async () => {
       // Retrieve the stored token object from localStorage
       const tokenObjectString = localStorage.getItem("accessToken");
@@ -64,7 +46,7 @@ function Result() {
       const accessToken = tokenObject?.accessToken;
 
       const response = await fetch(
-        "https://localhost:7259/api/Result/GetAllResults",
+        `https://localhost:7259/api/Result/GetAllResultsWithIncludedData?currentResultId=${data.result.id}`,
         {
           method: "GET",
           headers: {
@@ -75,99 +57,32 @@ function Result() {
       );
 
       if (response.ok) {
-        const data =
+        const resultData =
           (await response.headers.get("Content-Length")) !== "0"
             ? await response.json()
-            : [];
+            : {};
 
-        // Check if the data is an array
-        if (Array.isArray(data) && data.length > 0) {
-          // Specify the gameId you want to filter by
-          const gameId = 1; // Replace with the actual game ID you want to use
+        const userIds = new Set();
+        const sortedResults = [];
 
-          // Filter the fetched data to include only results for the specified game
-          const gameData = await data.filter((r) => r.gameId === gameId);
+        resultData.forEach((result) => {
+          if (!userIds.has(result.userId)) {
+            userIds.add(result.userId);
+            sortedResults.push(result);
+          }
+        });
 
-          // Initialize an empty object to keep track of the best (lowest) time for each user
-          const leaderboardMap = {};
+        setSortedLeaderboard(sortedResults);
 
-          // Process each result from the filtered game data
-          gameData.forEach((result) => {
-            const { userId, time } = result;
-
-            // Convert the time string to seconds for easy comparison
-            const timeInSeconds = timeToSeconds(time);
-
-            // Check if the user already has an entry in the leaderboard map
-            // And the time is better than the stored entry
-            if (
-              !leaderboardMap[userId] ||
-              timeInSeconds < leaderboardMap[userId]
-            ) {
-              // Update the leaderboard map with the lower time
-              leaderboardMap[userId] = timeInSeconds;
-            }
-          });
-
-          // Convert the leaderboard map to an array of objects for easier use
-          const leaderboardArray = Object.keys(leaderboardMap).map(
-            (userId) => ({
-              userId,
-              time: secondsToTime(leaderboardMap[userId]),
-            })
-          );
-
-          // Update the state with the processed leaderboard data
-          await setLeaderboard(leaderboardArray);
-        } else {
-          console.error("Unexpected data format or empty data array");
-        }
+        const currentResult = resultData.find((r) => r.id === data.result.id);
+        setTime(currentResult.time);
       } else {
-        // Log an error if the response was not successful
         console.error("Failed to get all results: ", response.error);
       }
     };
 
     fetchData();
-  }, [users]);
-
-  useEffect(() => {
-    // Sort leaderboard by time (in format "hh:mm:ss")
-    const sortedLeaderboard = [...leaderboard].sort((a, b) => {
-      // Convert times to seconds for comparison
-      const aSeconds = timeToSeconds(a.time);
-      const bSeconds = timeToSeconds(b.time);
-
-      return aSeconds - bSeconds; // Sort in ascending order
-    });
-
-    setSortedLeaderboard(sortedLeaderboard);
-  }, [leaderboard]);
-
-  //Converts HH:MM:SS to seconds
-  function timeToSeconds(timeStr) {
-    const [hours, minutes, seconds] = timeStr.split(":").map(Number);
-    return hours * 3600 + minutes * 60 + seconds;
-  }
-
-  //Converts seconds back to HH:MM:SS
-  function secondsToTime(seconds) {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
-      2,
-      "0"
-    )}:${String(secs).padStart(2, "0")}`;
-  }
-
-  function getUsernameFromId(id) {
-    if (users) {
-      const user = users.find((u) => u.userId === id);
-      return user.userName;
-    }
-    return "Please reload the page";
-  }
+  }, [user]);
 
   useEffect(() => {
     if (user) {
@@ -193,7 +108,7 @@ function Result() {
         <div className="result-box">
           <h1 className="result-title">MAGISK PRESTATION!</h1>
           <p className="result-time-text">
-            Du klarade det på tiden: {data ? JSON.stringify(data.time) : ""}
+            Du klarade det på tiden: {time ? JSON.stringify(time) : ""}
           </p>
           <p>
             {placementNumber !== 0
@@ -208,7 +123,7 @@ function Result() {
               if (user) {
                 const isCurrentUser = entry.userId === user.userId;
 
-                const entryUserName = getUsernameFromId(entry.userId);
+                const entryUserName = entry.username;
                 // Dynamically set the class name based on the condition
                 const entryClass = isCurrentUser
                   ? "leaderboard-entry current-user-result"
