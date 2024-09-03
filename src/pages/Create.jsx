@@ -142,7 +142,7 @@ function Create() {
   const closeCategoryModal = () => setShowCategoryModal(false);
 
   return (
-    <div className="container">
+    <div className="container-create">
       <div className="button-group">
         <button onClick={openModal} className="btn btn-primary mb-3">
           Lägg till nytt kort
