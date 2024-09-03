@@ -49,7 +49,7 @@ const ItemPopupModal = ({ show, handleClose, handleSave }) => {
                         </Button>
                     </div>
                     <div className="card-preview">
-                        <div className="card">
+                        <div className="card-create">
                             {imageLink ? (
                                 <img src={imageLink} alt={cardName} />
                             ) : (

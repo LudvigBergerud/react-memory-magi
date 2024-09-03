@@ -123,7 +123,6 @@ console.log(authHandler.isAuthenticated);
      <div className="card-body text-center" >
      <h2 className="card-title">{category.Name}</h2>
      <img   src={Omslagbild} alt="" style={{ width: '100%', height: '60%', borderRadius: '50px' }} />
-        <video src={video} autoPlay muted loop style={{ overflow:"hidden", zIndex:-1, position: "absolute", objectFit:"cover", top: 0,left:0}}></video>
         
         <Dropdown className='mb-2'>
         <Dropdown.Toggle variant="success">
