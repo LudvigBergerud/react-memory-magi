@@ -2,84 +2,55 @@ import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import "../styles/Result.css";
 import star from "../assets/Mario-Star.png";
+import useFetch from "../hooks/useFetch";
 
 function Result() {
   const location = useLocation();
-  const data = location.state?.data || { gameId: 1, time: "00:15:55" }; //Remove when we get data from game
+  const data = location.state?.data
+    ? location.state.data
+    : { gameId: 1, time: "99:99:99" }; //Default if someone didnt get time from game or went to result with URL
 
   const [leaderboard, setLeaderboard] = useState([]);
   const [sortedLeaderboard, setSortedLeaderboard] = useState(leaderboard);
   const [user, setUser] = useState(null);
   const [users, setUsers] = useState(null);
   const [placementNumber, setPlacementNumber] = useState(0);
+  const fetchUserHandler = useFetch();
+  const fetchUsersHandler = useFetch();
 
   useEffect(() => {
     const fetchUser = async () => {
-      // Retrieve the stored token object from localStorage
-      const tokenObjectString = localStorage.getItem("accessToken");
-      const tokenObject = tokenObjectString
-        ? JSON.parse(tokenObjectString)
-        : null;
-
-      // Access the actual string token from the object...
-      const accessToken = tokenObject?.accessToken;
-
-      const response = await fetch("https://localhost:7259/api/Users/user", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      if (response.ok) {
-        const data =
-          response.headers.get("Content-Length") !== "0"
-            ? await response.json()
-            : {};
-        await setUser(data);
-      } else {
-        console.error("Error fetching user: ", response.error);
-        await setUser(null);
-      }
+      await fetchUserHandler.handleData(
+        "https://localhost:7259/api/Users/user",
+        "GET"
+      );
     };
-
     fetchUser();
   }, []);
 
   useEffect(() => {
+    console.log(fetchUserHandler.data);
+    if (fetchUserHandler.data) {
+      setUser(fetchUserHandler.data);
+    }
+  }, [fetchUserHandler.data]);
+
+  useEffect(() => {
     const fetchUser = async () => {
-      // Retrieve the stored token object from localStorage
-      const tokenObjectString = localStorage.getItem("accessToken");
-      const tokenObject = tokenObjectString
-        ? JSON.parse(tokenObjectString)
-        : null;
-
-      // Access the actual string token from the object...
-      const accessToken = tokenObject?.accessToken;
-
-      const response = await fetch("https://localhost:7259/api/Users/users", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      if (response.ok) {
-        const data =
-          response.headers.get("Content-Length") !== "0"
-            ? await response.json()
-            : {};
-        await setUsers(data);
-      } else {
-        console.error("Error fetching user: ", response.error);
-        await setUsers(null);
-      }
+      await fetchUsersHandler.handleData(
+        "https://localhost:7259/api/Users/users",
+        "GET"
+      );
     };
-
     fetchUser();
   }, []);
+
+  useEffect(() => {
+    console.log(fetchUsersHandler.data);
+    if (fetchUsersHandler.data) {
+      setUsers(fetchUsersHandler.data);
+    }
+  }, [fetchUsersHandler.data]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -158,7 +129,7 @@ function Result() {
     };
 
     fetchData();
-  }, [user]);
+  }, [users]);
 
   useEffect(() => {
     // Sort leaderboard by time (in format "hh:mm:ss")
@@ -211,7 +182,6 @@ function Result() {
       });
       // If the id is not found, placementNumber is set to 0
       if (counter > sortedLeaderboard.length) {
-        console.log(counter, sortedLeaderboard.length);
         setPlacementNumber(0);
       }
     }

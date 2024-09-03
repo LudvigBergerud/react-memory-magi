@@ -52,7 +52,7 @@ function useFetch(url, obj, method) {
         options
       );
       if (apiResponse.ok) {
-        const data = await response.json();
+        const data = await apiResponse.json();
         accessToken = data;
         authHandler.signIn(data);
       } else {
