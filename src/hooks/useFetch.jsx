@@ -30,6 +30,10 @@ function useFetch(url, obj, method) {
     return options;
   }
 
+  async function createExternalOptions(obj, method) {
+    return { method: method, body: obj };
+  }
+
   async function checkToken() {
     accessToken = await localStorageHandler.getLocalStorage("accessToken");
     //Check that the access token exists
@@ -45,6 +49,7 @@ function useFetch(url, obj, method) {
   async function refreshToken() {
     const refreshTokenObj = { refreshToken: accessToken.refreshToken };
     const options = await createOptions(refreshTokenObj, "POST");
+    let errorMessage = "";
     //Make call to refresh point with refresh token as parameter
     try {
       const apiResponse = await fetch(
@@ -56,26 +61,42 @@ function useFetch(url, obj, method) {
         accessToken = data;
         authHandler.signIn(data);
       } else {
-        throw new Error(
-          `Server responded with status ${apiResponse.status} ${apiResponse.statusText}`
-        );
+        errorMessage = `Failed to refresh access token. Server responded with status ${apiResponse.status} ${apiResponse.statusText}. Please contact your system administrator or try again later.`;
+        throw new Error(errorMessage);
       }
     } catch (error) {
-      throw new Error(`Token refresh failed with ${error}`);
+      if (errorMessage === "") {
+        throw new Error(
+          `Failed to refresh access token. Server responded with error: ${error}. Please contact your system administrator or try again later`
+        );
+      } else {
+        throw new Error(errorMessage);
+      }
     }
   }
 
   async function handleData(url, method, obj) {
+    let options = {};
     try {
-      await checkToken();
-      const options = await createOptions(obj, method);
+      if (url.includes("localhost")) {
+        await checkToken();
+        options = await createOptions(obj, method);
+      } else {
+        options = await createExternalOptions(obj, method);
+      }
       setError(null);
       setData(null);
       setLoading(true);
       const apiResponse = await fetch(url, options);
-      setResponse(apiResponse);
-      const data = await apiResponse.json();
-      setData(data);
+      if (apiResponse.ok) {
+        setResponse(apiResponse);
+        const data = await apiResponse.json();
+        setData(data);
+      } else {
+        throw new Error(
+          `Request failed with status ${apiResponse.status} ${apiResponse.statusText}. Please contact your system administrator or try again later.`
+        );
+      }
     } catch (err) {
       setError(String(err));
     } finally {
