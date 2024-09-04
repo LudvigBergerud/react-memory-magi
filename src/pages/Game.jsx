@@ -208,13 +208,13 @@ console.log("kortid-:"+id)
        onClick={() => handleFlip(item.id, index)}>
         <div className={`card-game ${flippedcards[index]? 'cardFlip-game' : ''}`}>
       <div className='back-game'>
-                <img src={cardFront} alt="" style={{ width: '20rem', height: 'auto' }} />
+                <img src={item.image} alt="" style={{ width: '20rem', height: '462px' }} />
               </div>
               <div className="front-game">
                 <img
                   src={cardback}
                   alt=""
-                  style={{ width: "20rem", height: "auto" }}
+                  style={{ width: "20rem", height: "462" }}
                 />
               </div>
             </div>

@@ -85,7 +85,7 @@ form button:hover {
     margin: 0 auto;
 }
 
-.card img {
+.card-create img {
     max-width: 100%;
     max-height: 150px;
     border-radius: 10px;
