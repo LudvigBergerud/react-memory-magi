@@ -25,7 +25,7 @@ function ForgotPassword({ toggleForgottModal }) {
               Skriv in er Email adress - begär hjälp - kolla er inbox direkt!
             </p>
             <input
-              id="forgottPasswordInput"
+              id="forgottPasswordInput" // lagt till id
               type="text"
               placeholder="Email adress"
               value={email}
