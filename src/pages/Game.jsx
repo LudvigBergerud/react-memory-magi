@@ -14,6 +14,7 @@ function Game() {
   const [resultTime, setResultTime] =useState(0);
   const navigate = useNavigate();
   const [isRunning, setIsRunning] = useState(true);
+  const [error, setError] = useState("");
 
   let gameId= gameData?.gameId; //Denna behöver routas in beroende på vilket spel användare väljer
   let difficulty =gameData?.difficultyLevel; // Samma som ovan, routas in från quiz home page sidan, tillfällig variabel.
@@ -23,8 +24,12 @@ function Game() {
 //console.log("Objekt från HOME:"+gameData + JSON.stringify(gameData));
 //console.log(categoryId);
 
-const accessTokenString = localStorage.getItem("accessToken");
-const accessToken = accessTokenString ? JSON.parse(accessTokenString) : null;
+const tokenObjectString = localStorage.getItem("accessToken");
+const tokenObject = tokenObjectString
+  ? JSON.parse(tokenObjectString)
+  : null;
+const accessToken = tokenObject?.accessToken;
+
 
 useEffect(() => {
   if (items.length === 0 && isRunning === false) {
@@ -72,7 +77,19 @@ console.log("kortid-:"+id)
           Authorization: accessToken ? `Bearer ${accessToken}` : "",
         },
       })
-        .then((res) => res.json())
+        .then((res) => {
+        if(!res.ok)
+          {
+            return;
+           
+          }
+          else{
+            setError("");
+            return res.json()
+          }
+  
+       
+        })
         .then((data) => {
        
       console.log(data);
@@ -90,8 +107,9 @@ console.log("kortid-:"+id)
           }
           setItems(doubledItems);
           console.log(doubledItems);
-        });
-    };
+        }).catch((error) => {
+        setError("Anslutning till servern verkar ej vara möjlig");
+      });};
     fetchData();
   }, []);
 
@@ -162,6 +180,8 @@ console.log("kortid-:"+id)
 
   return (
     <div className="container">
+            {items.length > 0 ? (
+      <div>
        <div className='text-center'>
         </div>
       <div className='d-flex justify-content-between align-items-center'>
@@ -186,15 +206,15 @@ console.log("kortid-:"+id)
        style={{  height: '30rem' }}
        key={index}
        onClick={() => handleFlip(item.id, index)}>
-        <div className={`card ${flippedcards[index]? 'cardFlip' : ''}`}>
-      <div className='back'>
-                <img src={cardFront} alt="" style={{ width: '20rem', height: 'auto' }} />
+        <div className={`card-game ${flippedcards[index]? 'cardFlip-game' : ''}`}>
+      <div className='back-game'>
+                <img src={item.image} alt="" style={{ width: '20rem', height: '462px' }} />
               </div>
-              <div className="front">
+              <div className="front-game">
                 <img
                   src={cardback}
                   alt=""
-                  style={{ width: "20rem", height: "auto" }}
+                  style={{ width: "20rem", height: "462" }}
                 />
               </div>
             </div>
@@ -202,7 +222,18 @@ console.log("kortid-:"+id)
         ))}
       </div>
     </div>
-  );
-}
+  ) : (
+    <div className="text-center mb-4 mt-5">
+      <h5>Spelet laddas...</h5>
+      <div className="spinner-grow text-primary" role="status"></div>
+      <div className="spinner-grow text-secondary" role="status"></div>
+      <div className="spinner-grow text-success" role="status"></div>
+      <div className="spinner-grow text-danger" role="status"></div>
+      <h6>{error}</h6>
+    </div>
+  )}
+</div>
+);
+};
 
 export default Game;

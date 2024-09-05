@@ -19,8 +19,16 @@ function RegisterNewUser({ toggleModal }) {
     const userData = { username, email, password };
 
     setTimeout(() => setAlert(""), 3000);
+    setTimeout(() => setAlertAPI(""), 3000);
 
-    if (username.length <= 3 || !email.includes("@") || password.length <= 5) {
+    const specialTecken = "!@#$%^&*()_-+=<>?/";
+
+    if (
+      username.length <= 3 ||
+      !email.includes("@") ||
+      password.length <= 5 ||
+      !password.split("").some((char) => specialTecken.includes(char))
+    ) {
       setAlert(
         "Hey, du saknar antingen en stor bokstav, liten eller något tecken i din registrering"
       );
@@ -32,16 +40,25 @@ function RegisterNewUser({ toggleModal }) {
       "POST",
       userData
     );
-
-    if (createNewUser.response.status === 200) {
-      console.log(createNewUser.response);
-      toggleModal();
-    } else {
-      setAlertAPI(
-        "Vi ber om ursäkt, vi har problem med våra servrar. Vi håller på och undersöker detta!"
-      );
-    }
   };
+
+  useEffect(() => {
+    if (createNewUser.response) {
+      if (createNewUser.response.status === 200) {
+        console.log(createNewUser.response);
+        toggleModal();
+      } else if (
+        createNewUser.response.status === 404 ||
+        createNewUser.response.status === 500 ||
+        createNewUser.response.error
+      ) {
+        console.log(createNewUser.response);
+        setAlertAPI(
+          "Vi ber om ursäkt, vi har problem med våra servrar. Vi håller på och undersöker detta!"
+        );
+      }
+    }
+  }, [createNewUser.response]);
 
   return (
     <>
