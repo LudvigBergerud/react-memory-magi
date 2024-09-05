@@ -65,18 +65,21 @@ function RegisterNewUser({ toggleModal }) {
       <div className="modalComponent">
         <p>Registera era uppgifter</p>
         <input
+          id="username"
           type="text"
           placeholder="Användarnamn"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
         <input
+          id="email"
           type="text"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
         <input
+          id="password"
           type="password"
           placeholder="Lösnord"
           value={password}

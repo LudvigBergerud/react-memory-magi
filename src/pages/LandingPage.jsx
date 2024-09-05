@@ -101,6 +101,7 @@ function Landingpage() {
               </div>
               <div className="centerInputs">
                 <input
+                  id="username"
                   type="text"
                   placeholder="Användarnamn"
                   value={email}
@@ -109,6 +110,7 @@ function Landingpage() {
                 <br />
                 <br />
                 <input
+                  id="password"
                   type="password"
                   placeholder="Lösenord"
                   value={password}
@@ -116,17 +118,29 @@ function Landingpage() {
                 />
                 <br />
                 <br />
-                <button className="roundButton" onClick={toggleSignUpModal}>
+                <button
+                  id="createAccountButton"
+                  className="roundButton"
+                  onClick={toggleSignUpModal}
+                >
                   Skapa konto
                 </button>{" "}
-                <button className="roundButton" onClick={handleLogIn}>
+                <button
+                  id="loginButton"
+                  className="roundButton"
+                  onClick={handleLogIn}
+                >
                   Logga in
                 </button>
                 {alert !== "" ? <Alerts alert={alert} /> : ""}
                 {alertAPI !== "" ? <APIAlert alert={alertAPI} /> : ""}
                 <br />
                 <br />
-                <button className="roundButton" onClick={toggleForgottPassword}>
+                <button
+                  id="forgottPasswordButton"
+                  className="roundButton"
+                  onClick={toggleForgottPassword}
+                >
                   Glömt lösenord?{" "}
                 </button>
               </div>
