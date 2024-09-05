@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { updateUserAchievements } from "../utils/AchievementChecker";
 import "../styles/Result.css";
 import star from "../assets/Mario-Star.png";
 import useFetch from "../hooks/useFetch";
@@ -13,6 +14,7 @@ function Result() {
   const [sortedLeaderboard, setSortedLeaderboard] = useState([]);
   const [user, setUser] = useState(null);
   const [time, setTime] = useState(null);
+  const [resultData, setResultData] = useState(null);
   const [placementNumber, setPlacementNumber] = useState(0);
 
   const fetchUserHandler = useFetch();
@@ -28,9 +30,11 @@ function Result() {
   }, []);
 
   useEffect(() => {
-    console.log(fetchUserHandler.data);
     if (fetchUserHandler.data) {
       setUser(fetchUserHandler.data);
+    } else {
+      console.log("Error fetching user: ", fetchUserHandler.error);
+      setUser(null);
     }
   }, [fetchUserHandler.data]);
 
@@ -57,24 +61,26 @@ function Result() {
       );
 
       if (response.ok) {
-        const resultData =
+        const responseData =
           (await response.headers.get("Content-Length")) !== "0"
             ? await response.json()
             : {};
 
+        console.log("TEST", responseData);
         const userIds = new Set();
         const sortedResults = [];
 
-        resultData.forEach((result) => {
+        responseData.forEach((result) => {
           if (!userIds.has(result.userId)) {
             userIds.add(result.userId);
             sortedResults.push(result);
           }
         });
 
+        await setResultData(responseData);
         setSortedLeaderboard(sortedResults);
 
-        const currentResult = resultData.find((r) => r.id === data.result.id);
+        const currentResult = responseData.find((r) => r.id === data.result.id);
         setTime(currentResult.time);
       } else {
         console.error("Failed to get all results: ", response.error);
@@ -101,6 +107,16 @@ function Result() {
       }
     }
   }, [sortedLeaderboard, user]);
+
+  useEffect(() => {
+    const fetchAndUpdateAchievements = async () => {
+      if (user && resultData) {
+        await updateUserAchievements(user, data.result.id);
+      }
+    };
+
+    fetchAndUpdateAchievements();
+  }, [data.result.id, user, resultData]);
 
   return (
     <>

@@ -1,155 +1,11 @@
 import React, { useEffect, useState } from "react";
 import "../styles/Profile.css";
-
+import useFetch from "../hooks/useFetch";
 //Seed data
-const achievements = [
-  {
-    id: 1,
-    name: "Stjärna",
-    earned: true,
-    description: "Klarat alla nivåer i spelet med perfekt resultat.",
-    points: 100,
-  },
-  {
-    id: 2,
-    name: "Mästare",
-    earned: true,
-    description: "Avslutat spelet utan att göra några fel.",
-    points: 90,
-  },
-  {
-    id: 3,
-    name: "Expert",
-    earned: true,
-    description: "Slutfört spelet på svåraste svårighetsgraden.",
-    points: 80,
-  },
-  {
-    id: 4,
-    name: "Novis",
-    earned: true,
-    description: "Avklarat din första nivå i spelet.",
-    points: 20,
-  },
-  {
-    id: 5,
-    name: "Hjälte",
-    earned: false,
-    description: "Räddat en medspelare genom att lösa ett svårt pussel.",
-    points: 50,
-  },
-  {
-    id: 6,
-    name: "Arcane Magiker",
-    earned: true,
-    description:
-      "Använt specialförmågor för att lösa de svåraste utmaningarna.",
-    points: 70,
-  },
-  {
-    id: 7,
-    name: "Guldletare",
-    earned: false,
-    description: "Hittat alla gömda skatter i spelet.",
-    points: 60,
-  },
-  {
-    id: 8,
-    name: "Förtrollad Upptäckare",
-    earned: false,
-    description: "Upptäckt alla hemliga platser i spelet.",
-    points: 40,
-  },
-  {
-    id: 9,
-    name: "Kunglig Blodlinje",
-    earned: false,
-    description: "Slutfört en uppgift som endast de ädlaste kan hantera.",
-    points: 100,
-  },
-  {
-    id: 10,
-    name: "Profet",
-    earned: false,
-    description: "Förutsett och undvikit alla faror i spelet.",
-    points: 60,
-  },
-  {
-    id: 11,
-    name: "Hjärnmagi",
-    earned: true,
-    description: "Löst alla pussel genom att använda minne och logik.",
-    points: 85,
-  },
-  {
-    id: 12,
-    name: "Eldens Väktare",
-    earned: false,
-    description: "Skyddat de sista eldsflammorna från att slockna.",
-    points: 70,
-  },
-  {
-    id: 13,
-    name: "Stridens General",
-    earned: true,
-    description: "Vunnit alla strider i spelet utan att förlora en enda gång.",
-    points: 95,
-  },
-  {
-    id: 14,
-    name: "Mystiskt Geni",
-    earned: false,
-    description: "Löst de mest komplexa gåtorna utan hjälp.",
-    points: 100,
-  },
-  {
-    id: 15,
-    name: "Stormens Varelse",
-    earned: false,
-    description: "Överlevt en storm av utmaningar utan att bli besegrad.",
-    points: 80,
-  },
-  {
-    id: 16,
-    name: "Kosmisk Väktare",
-    earned: false,
-    description:
-      "Försvarat universumets jämvikt genom att klara alla svåra nivåer.",
-    points: 90,
-  },
-  {
-    id: 17,
-    name: "Drakryttare",
-    earned: false,
-    description: "Bemästrat konsten att tämja och rida på drakar.",
-    points: 85,
-  },
-  {
-    id: 18,
-    name: "Nattens Väktare",
-    earned: false,
-    description: "Vunnit en kamp mot nattens krafter.",
-    points: 75,
-  },
-  {
-    id: 19,
-    name: "Skuggornas Krigare",
-    earned: false,
-    description: "Besegrat fiender som gömmer sig i skuggorna.",
-    points: 65,
-  },
-  {
-    id: 20,
-    name: "Ljusalv",
-    earned: false,
-    description: "Använt ljusets kraft för att övervinna mörkrets utmaningar.",
-    points: 80,
-  },
-];
 
 function Profile() {
-  const earnedAchievements = achievements.filter((ach) => ach.earned);
-  const unearnedAchievements = achievements.filter((ach) => !ach.earned);
+  const [earnedAchievements, setEarnedAchievements] = useState(null);
+  const [unearnedAchievements, setUnearnedAchievements] = useState(null);
 
   const [visibleTooltip, setVisibleTooltip] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({});
@@ -162,41 +18,64 @@ function Profile() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  const fetchUserHandler = useFetch();
+  const fetchAchievementHandler = useFetch();
+
   useEffect(() => {
     const fetchUser = async () => {
-      // Retrieve the stored token object from localStorage
-      const tokenObjectString = localStorage.getItem("accessToken");
-      const tokenObject = tokenObjectString
-        ? JSON.parse(tokenObjectString)
-        : null;
-
-      // Access the actual string token from the object...
-      const accessToken = tokenObject?.accessToken;
-
-      const response = await fetch("https://localhost:7259/api/Users/user", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      if (response.ok) {
-        const data =
-          response.headers.get("Content-Length") !== "0"
-            ? await response.json()
-            : {};
-        setUser(data);
-        setEmail(data.email);
-        setUserName(data.userName);
-      } else {
-        console.log("Error fetching user: ", response.error);
-        setUser(null);
-      }
+      await fetchUserHandler.handleData(
+        "https://localhost:7259/api/Users/user",
+        "GET"
+      );
     };
-
     fetchUser();
   }, []);
+
+  useEffect(() => {
+    if (fetchUserHandler.data) {
+      console.log(fetchUserHandler.data);
+      setUser(fetchUserHandler.data);
+      setEmail(fetchUserHandler.data.email);
+      setUserName(fetchUserHandler.data.userName);
+    } else {
+      console.log("Error fetching user: ", fetchUserHandler.error);
+      setUser(null);
+    }
+  }, [fetchUserHandler.data]);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      await fetchAchievementHandler.handleData(
+        "https://localhost:7259/api/Achievement/GetAllAchievements",
+        "GET"
+      );
+    };
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      if (fetchAchievementHandler.data) {
+        const userAchievementIds = user.achievements.map(
+          (achievement) => achievement.achievementId
+        );
+
+        setUnearnedAchievements(
+          fetchAchievementHandler.data.filter(
+            (achievement) => !userAchievementIds.includes(achievement.id)
+          )
+        );
+        setEarnedAchievements(
+          fetchAchievementHandler.data.filter((achievement) =>
+            userAchievementIds.includes(achievement.id)
+          )
+        );
+      } else {
+        console.log("Error fetching user: ", fetchAchievementHandler.error);
+        setUser(null);
+      }
+    }
+  }, [fetchAchievementHandler.data, user]);
 
   const handleSubmitUpdateUser = async (e) => {
     e.preventDefault();
@@ -269,7 +148,7 @@ function Profile() {
 
       if (response.ok) {
         alert("Password updated successfully.");
-        // Optionally, reset the form fields
+        // Reset the form fields
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
@@ -296,28 +175,14 @@ function Profile() {
     setVisibleTooltip(null);
   };
 
-  function getEarnedAchievementPoints() {
-    let points = 0;
-    earnedAchievements.map((ach) => (points += ach.points));
-    return points;
-  }
-
-  function getAllAchievementPoints() {
-    let points = 0;
-    achievements.map((ach) => (points += ach.points));
-    return points;
-  }
-
   return (
     <>
       <div className="profile-page">
         <div className="col-1"></div>
         <div className="profile-content col-10">
           <div className="profile-content-left">
-            <h1>Profil nivå</h1>
-            <h2>Du är nivå: [3]</h2>
-            <h3>Poäng till nästa nivå: [420]</h3>
-            <div className="achievements-section">
+            <h1 className="mb-5">Profil utmärkelser</h1>
+            <div className="achievements-section mt-5">
               <h2>
                 Medaljer
                 <svg
@@ -332,8 +197,11 @@ function Profile() {
                   <path d="M4 11.794V16l4-1 4 1v-4.206l-2.018.306L8 13.126 6.018 12.1z" />
                 </svg>{" "}
                 <span>
-                  Du har [{getEarnedAchievementPoints()}/
-                  {getAllAchievementPoints()}] poäng
+                  {earnedAchievements && unearnedAchievements
+                    ? `Du har [${earnedAchievements.length}/${
+                        earnedAchievements.length + unearnedAchievements.length
+                      }] medaljer`
+                    : "No achievements data available"}
                 </span>
               </h2>
 
@@ -341,68 +209,64 @@ function Profile() {
                 <div className="achievements-earned">
                   <h3>Dina medaljer</h3>
                   <div className="achievements-grid">
-                    {earnedAchievements.map((achievement) => (
-                      <div
-                        key={achievement.id}
-                        className="achievement-item"
-                        onMouseEnter={(e) =>
-                          handleMouseEnter(achievement.id, e)
-                        }
-                        onMouseLeave={handleMouseLeave}
-                      >
-                        {achievement.name}
-                        {visibleTooltip === achievement.id && (
+                    {earnedAchievements
+                      ? earnedAchievements.map((achievement) => (
                           <div
-                            className="custom-tooltip"
-                            style={{
-                              position: "fixed",
-                              top: tooltipPosition.top + 50,
-                              left: tooltipPosition.left,
-                            }}
+                            key={achievement.id}
+                            className="achievement-item"
+                            onMouseEnter={(e) =>
+                              handleMouseEnter(achievement.id, e)
+                            }
+                            onMouseLeave={handleMouseLeave}
                           >
-                            {achievement.description}
-                            <br />
-                            <p className="mb-0">
-                              Värd {achievement.points} poäng
-                            </p>
+                            {achievement.name}
+                            {visibleTooltip === achievement.id && (
+                              <div
+                                className="custom-tooltip"
+                                style={{
+                                  position: "fixed",
+                                  top: tooltipPosition.top + 50,
+                                  left: tooltipPosition.left,
+                                }}
+                              >
+                                {achievement.description}
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                    ))}
+                        ))
+                      : ""}
                   </div>
                 </div>
 
                 <div className="achievements-not-earned mt-4">
                   <h3>Låsta Medaljer</h3>
                   <div className="achievements-grid">
-                    {unearnedAchievements.map((achievement) => (
-                      <div
-                        key={achievement.id}
-                        className="achievement-item"
-                        onMouseEnter={(e) =>
-                          handleMouseEnter(achievement.id, e)
-                        }
-                        onMouseLeave={handleMouseLeave}
-                      >
-                        {achievement.name}
-                        {visibleTooltip === achievement.id && (
+                    {unearnedAchievements
+                      ? unearnedAchievements.map((achievement) => (
                           <div
-                            className="custom-tooltip"
-                            style={{
-                              position: "fixed",
-                              top: tooltipPosition.top + 50,
-                              left: tooltipPosition.left,
-                            }}
+                            key={achievement.id}
+                            className="achievement-item"
+                            onMouseEnter={(e) =>
+                              handleMouseEnter(achievement.id, e)
+                            }
+                            onMouseLeave={handleMouseLeave}
                           >
-                            {achievement.description}
-                            <br />
-                            <p className="mb-0">
-                              Värd {achievement.points} poäng
-                            </p>
+                            {achievement.name}
+                            {visibleTooltip === achievement.id && (
+                              <div
+                                className="custom-tooltip"
+                                style={{
+                                  position: "fixed",
+                                  top: tooltipPosition.top + 50,
+                                  left: tooltipPosition.left,
+                                }}
+                              >
+                                {achievement.description}
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                    ))}
+                        ))
+                      : ""}
                   </div>
                 </div>
               </div>
