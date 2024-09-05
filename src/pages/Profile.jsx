@@ -33,7 +33,6 @@ function Profile() {
 
   useEffect(() => {
     if (fetchUserHandler.data) {
-      console.log(fetchUserHandler.data);
       setUser(fetchUserHandler.data);
       setEmail(fetchUserHandler.data.email);
       setUserName(fetchUserHandler.data.userName);
@@ -276,11 +275,11 @@ function Profile() {
           <div className="profile-content-right">
             <h1 className="mb-5">Profil detaljer</h1>
 
-            <form onSubmit={handleSubmitUpdateUser} className="input-field-box">
+            <form onSubmit={handleSubmitUpdateUser}>
               <div className="justify-space-between">
                 <label className="m-2 font-weight-bold">Användarnamn: </label>
                 <input
-                  type="text"
+                  type="username"
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
                   placeholder="Användarnamn"
@@ -307,10 +306,7 @@ function Profile() {
 
             <form className="input-field-box"></form>
 
-            <form
-              onSubmit={handleSubmitNewPassword}
-              className="input-field-box"
-            >
+            <form onSubmit={handleSubmitNewPassword}>
               <div className="justify-space-between">
                 <label className="m-2 font-weight-bold">
                   Nuvarande lösenord:{" "}

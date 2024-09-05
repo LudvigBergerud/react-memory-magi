@@ -1,8 +1,8 @@
-import React, {useState,useEffect, useRef} from 'react'
-import { useLocation, Link,useNavigate } from 'react-router-dom';
-import cardback from '../assets/cardBack.png'
-import cardFront from '../assets/cardFront.png'
-import './Game.css'
+import React, { useState, useEffect, useRef } from "react";
+import { useLocation, Link, useNavigate } from "react-router-dom";
+import cardback from "../assets/cardBack.png";
+import cardFront from "../assets/cardFront.png";
+import "./Game.css";
 
 function Game() {
   const location = useLocation();
@@ -11,38 +11,33 @@ function Game() {
   const [flippedcards, setNewflipState] = useState({});
   const [listOfFlippedCards, setList] = useState([]);
   const [time, setTime] = useState(0);
-  const [resultTime, setResultTime] =useState(0);
+  const [resultTime, setResultTime] = useState(0);
   const navigate = useNavigate();
   const [isRunning, setIsRunning] = useState(true);
   const [error, setError] = useState("");
 
-  let gameId= gameData?.gameId; //Denna behöver routas in beroende på vilket spel användare väljer
-  let difficulty =gameData?.difficultyLevel; // Samma som ovan, routas in från quiz home page sidan, tillfällig variabel.
-  let userId ="new_user_id"; //samma som ovan, tillfällig variabel
- // console.log(location.state);
+  let gameId = gameData?.gameId; //Denna behöver routas in beroende på vilket spel användare väljer
+  let difficulty = gameData?.difficultyLevel; // Samma som ovan, routas in från quiz home page sidan, tillfällig variabel.
+  let userId = "new_user_id"; //samma som ovan, tillfällig variabel
+  // console.log(location.state);
   //console.log(gameData);
-//console.log("Objekt från HOME:"+gameData + JSON.stringify(gameData));
-//console.log(categoryId);
+  //console.log("Objekt från HOME:"+gameData + JSON.stringify(gameData));
+  //console.log(categoryId);
 
-const tokenObjectString = localStorage.getItem("accessToken");
-const tokenObject = tokenObjectString
-  ? JSON.parse(tokenObjectString)
-  : null;
-const accessToken = tokenObject?.accessToken;
+  const tokenObjectString = localStorage.getItem("accessToken");
+  const tokenObject = tokenObjectString ? JSON.parse(tokenObjectString) : null;
+  const accessToken = tokenObject?.accessToken;
 
+  useEffect(() => {
+    if (items.length === 0 && isRunning === false) {
+      EndGame();
+      console.log("The list is now empty.");
+      // You can perform any other actions here, e.g., show a victory message, reset the game, etc.
+    }
+  }, [items]);
 
-useEffect(() => {
-  if (items.length === 0 && isRunning === false) {
-    EndGame();
-    console.log("The list is now empty.");
-    // You can perform any other actions here, e.g., show a victory message, reset the game, etc.
-  }
-}, [items]);
-
-
-
-  const handleFlip = (id,index) => {
-console.log("kortid-:"+id)
+  const handleFlip = (id, index) => {
+    console.log("kortid-:" + id);
 
     setList([...listOfFlippedCards, id]);
 
@@ -61,38 +56,32 @@ console.log("kortid-:"+id)
     }));
   };
 
-
-
-
-
   //Hämta korten från en specifik kategori
   useEffect(() => {
     const accessTokenString = localStorage.getItem("accessToken");
-    const accessToken = accessTokenString ? JSON.parse(accessTokenString) : null;
-  
+    const accessToken = accessTokenString
+      ? JSON.parse(accessTokenString)
+      : null;
 
     const fetchData = async () => {
-      await fetch(`https://localhost:7259/api/Item/GettItemFromGameId?gameid=${gameId}`, {
-        headers: {
-          Authorization: accessToken ? `Bearer ${accessToken}` : "",
-        },
-      })
+      await fetch(
+        `https://localhost:7259/api/Item/GettItemFromGameId?gameid=${gameId}`,
+        {
+          headers: {
+            Authorization: accessToken ? `Bearer ${accessToken}` : "",
+          },
+        }
+      )
         .then((res) => {
-        if(!res.ok)
-          {
+          if (!res.ok) {
             return;
-           
-          }
-          else{
+          } else {
             setError("");
-            return res.json()
+            return res.json();
           }
-  
-       
         })
         .then((data) => {
-       
-      console.log(data);
+          console.log(data);
           //Duplicera listan då vi behöver ha 2 kort av varje för memory
           const deepCopiedItems = data.map((item) =>
             JSON.parse(JSON.stringify(item))
@@ -107,27 +96,26 @@ console.log("kortid-:"+id)
           }
           setItems(doubledItems);
           console.log(doubledItems);
-        }).catch((error) => {
-        setError("Anslutning till servern verkar ej vara möjlig");
-      });};
+        })
+        .catch((error) => {
+          setError("Anslutning till servern verkar ej vara möjlig");
+        });
+    };
     fetchData();
   }, []);
 
   useEffect(() => {
-    if(isRunning)
-    {
+    if (isRunning) {
       let interval;
 
       interval = setInterval(() => {
         setTime((prevTime) => prevTime + 10);
       }, 10);
-  
+
       return () => clearInterval(interval);
+    } else {
+      return;
     }
-    else{
-      return
-    }
- 
   });
 
   //Denna är aktiv hela tiden och kollar hur många kort som är klickade just nu.
@@ -140,20 +128,19 @@ console.log("kortid-:"+id)
       console.log("andra" + secondCard);
 
       if (firstCard === secondCard) {
-
         console.log("Korten matchar");
         setIsRunning(false);
-        
+
         setTimeout(() => {
           setNewflipState({});
           setList([]);
         }, 2250);
         //väntar lite till då animation av flippningen sker
         setTimeout(() => {
-          setItems(prevItems => prevItems.filter(item => item.id !== firstCard))
+          setItems((prevItems) =>
+            prevItems.filter((item) => item.id !== firstCard)
+          );
         }, 2900);
-      
-        
       } else {
         //resetta alla kort om det inte var en match
         setTimeout(() => {
@@ -164,76 +151,81 @@ console.log("kortid-:"+id)
     }
   }, [flippedcards]);
 
-  const EndGame= () =>{
-    const minutes = String(Math.floor((time / 60000) % 60)).slice(-2)
-    const seconds = String(Math.floor((time % 60000) / 1000)).slice(-2);
+  const EndGame = () => {
+    const hours = String(Math.floor((time / 3600000) % 24)).padStart(2, "0");
+    const minutes = String(Math.floor((time / 60000) % 60)).padStart(2, "0");
+    const seconds = String(Math.floor((time % 60000) / 1000)).padStart(2, "0");
 
-    var timeResult= `${minutes}:${seconds}`;
+    var timeResult = `${hours}:${minutes}:${seconds}`;
 
-    var ResultData = {gameId:gameId,time:timeResult
-    }
-    console.log(ResultData);
-    navigate("/Result", { state: {ResultData}});
+    var ResultData = { gameId: gameId, time: timeResult };
 
-
-  }
+    navigate("/Result", { state: { ResultData } });
+  };
 
   return (
     <div className="container">
-            {items.length > 0 ? (
-      <div>
-       <div className='text-center'>
-        </div>
-      <div className='d-flex justify-content-between align-items-center'>
-      <div className="flex-grow-1 d-flex justify-content-center" >
-       
-      <h1 >{("0" + Math.floor((time / 60000) % 60)).slice(-2)}:
-        {("0" + Math.floor((time / 1000) % 60)).slice(-2)}:
-        {("0" + ((time / 10) % 100)).slice(-2)}</h1>
-       
-      </div>
-      <div>
-    <Link to="/home" > 
-      <button className="btn btn-danger">Avbryt spel</button>
-      </Link>
-      </div>
-      
-      </div>
-  <div className="row" >
-
-  {items.map((item, index) => (
-       <div className="col-sm-4"
-       style={{  height: '30rem' }}
-       key={index}
-       onClick={() => handleFlip(item.id, index)}>
-        <div className={`card-game ${flippedcards[index]? 'cardFlip-game' : ''}`}>
-      <div className='back-game'>
-                <img src={item.image} alt="" style={{ width: '20rem', height: '462px' }} />
-              </div>
-              <div className="front-game">
-                <img
-                  src={cardback}
-                  alt=""
-                  style={{ width: "20rem", height: "462" }}
-                />
-              </div>
+      {items.length > 0 ? (
+        <div>
+          <div className="text-center"></div>
+          <div className="d-flex justify-content-between align-items-center">
+            <div className="flex-grow-1 d-flex justify-content-center">
+              <h1>
+                {("0" + Math.floor((time / 60000) % 60)).slice(-2)}:
+                {("0" + Math.floor((time / 1000) % 60)).slice(-2)}:
+                {("0" + ((time / 10) % 100)).slice(-2)}
+              </h1>
+            </div>
+            <div>
+              <Link to="/home">
+                <button className="btn btn-danger">Avbryt spel</button>
+              </Link>
             </div>
           </div>
-        ))}
-      </div>
+          <div className="row">
+            {items.map((item, index) => (
+              <div
+                className="col-sm-4"
+                style={{ height: "30rem" }}
+                key={index}
+                onClick={() => handleFlip(item.id, index)}
+              >
+                <div
+                  className={`card-game ${
+                    flippedcards[index] ? "cardFlip-game" : ""
+                  }`}
+                >
+                  <div className="back-game">
+                    <img
+                      src={item.image}
+                      alt=""
+                      style={{ width: "20rem", height: "462px" }}
+                    />
+                  </div>
+                  <div className="front-game">
+                    <img
+                      src={cardback}
+                      alt=""
+                      style={{ width: "20rem", height: "462" }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="text-center mb-4 mt-5">
+          <h5>Spelet laddas...</h5>
+          <div className="spinner-grow text-primary" role="status"></div>
+          <div className="spinner-grow text-secondary" role="status"></div>
+          <div className="spinner-grow text-success" role="status"></div>
+          <div className="spinner-grow text-danger" role="status"></div>
+          <h6>{error}</h6>
+        </div>
+      )}
     </div>
-  ) : (
-    <div className="text-center mb-4 mt-5">
-      <h5>Spelet laddas...</h5>
-      <div className="spinner-grow text-primary" role="status"></div>
-      <div className="spinner-grow text-secondary" role="status"></div>
-      <div className="spinner-grow text-success" role="status"></div>
-      <div className="spinner-grow text-danger" role="status"></div>
-      <h6>{error}</h6>
-    </div>
-  )}
-</div>
-);
-};
+  );
+}
 
 export default Game;
