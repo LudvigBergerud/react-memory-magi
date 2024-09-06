@@ -22,6 +22,7 @@ function Result() {
   const [currentAchievementIndex, setCurrentAchievementIndex] = useState(0);
 
   const [resultPosted, setResultPosted] = useState(false);
+  const [resultBeingPosted, setResultBeingPosted] = useState(false);
 
   const fetchUserHandler = useFetch();
 
@@ -51,7 +52,8 @@ function Result() {
 
   useEffect(() => {
     const postResult = async () => {
-      if (user && ResultData && !resultPosted) {
+      if (user && ResultData && !resultPosted && !resultBeingPosted) {
+        setResultBeingPosted(true);
         const tokenObjectString = localStorage.getItem("accessToken");
         const tokenObject = tokenObjectString
           ? JSON.parse(tokenObjectString)
@@ -84,11 +86,13 @@ function Result() {
             setCurrentResult(responseData);
             setResultPosted(true);
           } else {
+            setResultBeingPosted(false);
             console.error("Failed to post result", response.error);
           }
         } catch (error) {
           console.error("Error posting result: ", error);
         }
+        setResultBeingPosted(false);
       }
     };
     postResult();
