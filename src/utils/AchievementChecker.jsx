@@ -4,9 +4,8 @@ export const hasAchievement = (playerAchievements, achievement) => {
 
 export const checkResultAchievements = async (user, result) => {
   const allAchievements = await fetchAllAchievements();
-
   const userAchievementIds = user.achievements.map(
-    (achievement) => achievement.id
+    (achievement) => achievement.achievementId
   );
 
   const allResults = await fetchAllResults(result);
@@ -98,6 +97,7 @@ export const checkResultAchievements = async (user, result) => {
       if (unlocked) {
         updatedAchievements.push({
           achievementId: achievement.id,
+          name: achievement.name,
           AchievementDate: new Date().toISOString().split("T")[0],
         });
       }
@@ -128,10 +128,7 @@ export const checkResultAchievements = async (user, result) => {
       );
 
       if (response.ok) {
-        const updatedUser = await response.json();
-
-        // Update the user state with the new user data
-        user = updatedUser;
+        console.log("Updated achievements correctly");
       } else {
         console.error("Failed to update achievements.");
       }
@@ -139,8 +136,7 @@ export const checkResultAchievements = async (user, result) => {
       console.error("Error updating achievements:", error);
     }
   }
-  // Return the updated user object with new achievements
-  return user;
+  return updatedAchievements;
 };
 
 export const fetchAllAchievements = async () => {
@@ -198,6 +194,9 @@ export const fetchAllResults = async (result) => {
 };
 
 export const updateUserAchievements = async (currentUser, result) => {
-  const updatedUser = await checkResultAchievements(currentUser, result);
-  return updatedUser;
+  const updatedAchievements = await checkResultAchievements(
+    currentUser,
+    result
+  );
+  return updatedAchievements;
 };

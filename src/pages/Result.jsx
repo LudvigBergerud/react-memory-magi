@@ -4,6 +4,7 @@ import { updateUserAchievements } from "../utils/AchievementChecker";
 import "../styles/Result.css";
 import star from "../assets/Mario-Star.png";
 import useFetch from "../hooks/useFetch";
+import AchievementModal from "../components/AchievementModal";
 
 function Result() {
   const location = useLocation();
@@ -16,6 +17,9 @@ function Result() {
   const [resultData, setResultData] = useState(null);
   const [placementNumber, setPlacementNumber] = useState(0);
   const [currentResult, setCurrentResult] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [unlockedAchievements, setUnlockedAchievements] = useState([]);
+  const [currentAchievementIndex, setCurrentAchievementIndex] = useState(0);
 
   const [resultPosted, setResultPosted] = useState(false);
 
@@ -93,6 +97,7 @@ function Result() {
   useEffect(() => {
     const fetchData = async () => {
       if (currentResult) {
+        console.log("Current:", currentResult);
         // Retrieve the stored token object from localStorage
         const tokenObjectString = localStorage.getItem("accessToken");
         const tokenObject = tokenObjectString
@@ -103,7 +108,7 @@ function Result() {
         const accessToken = tokenObject?.accessToken;
 
         const response = await fetch(
-          `https://localhost:7259/api/Result/GetAllResultsWithIncludedData?currentResultId=${currentResult.gameId}`,
+          `https://localhost:7259/api/Result/GetAllResultsWithIncludedData?currentResultId=${currentResult.id}`,
           {
             method: "GET",
             headers: {
@@ -161,7 +166,15 @@ function Result() {
   useEffect(() => {
     const fetchAndUpdateAchievements = async () => {
       if (user && resultData) {
-        await updateUserAchievements(user, currentResult);
+        const unlockedAchievements = await updateUserAchievements(
+          user,
+          currentResult
+        );
+        if (unlockedAchievements.length > 0) {
+          setUnlockedAchievements(unlockedAchievements);
+          setCurrentAchievementIndex(0);
+          setIsModalOpen(true);
+        }
       }
     };
 
@@ -174,6 +187,18 @@ function Result() {
 
   const handlePlayAnotherGame = () => {
     navigate("/home"); // Navigate to /home
+  };
+
+  const handleCloseModal = () => {
+    if (currentAchievementIndex < unlockedAchievements.length - 1) {
+      // Move to the next achievement in the queue
+      setCurrentAchievementIndex(currentAchievementIndex + 1);
+    } else {
+      // If there are no more achievements in the queue, reset the state
+      setUnlockedAchievements([]);
+      setCurrentAchievementIndex(0);
+      setIsModalOpen(false);
+    }
   };
 
   return (
@@ -246,6 +271,16 @@ function Result() {
           className="result-animated-image image2"
           alt="Decorative"
         />
+      </div>
+      <div>
+        {/* Render the modal only if it's open and there are unlocked achievements */}
+        {isModalOpen && unlockedAchievements.length > 0 && (
+          <AchievementModal
+            isOpen={isModalOpen}
+            onClose={handleCloseModal}
+            achievement={unlockedAchievements[currentAchievementIndex]}
+          />
+        )}
       </div>
     </>
   );
