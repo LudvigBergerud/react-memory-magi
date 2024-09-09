@@ -19,6 +19,7 @@
   flex-direction: column;
   padding: 4vh;
   position: relative;
+  z-index: 1;
 }
 .result-title {
   margin: 0;
@@ -71,9 +72,9 @@
   color: #333;
 }
 
-.animated-image {
+.result-animated-image {
   position: fixed;
-  z-index: -1;
+  z-index: 0;
   animation: scaleAnimation 7s infinite;
 }
 
