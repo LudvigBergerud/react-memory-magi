@@ -150,8 +150,16 @@ console.log(authHandler.isAuthenticated);
      
       </Dropdown>
        
-       <a onClick={
-        () => startGame(selectedGames[index].id, selectedGames[index].difficulty,selectedGames[index].name)} className="btn btn-primary">Starta spel</a>
+      {selectedGames[index] && (
+  <a
+    onClick={() =>
+      startGame(selectedGames[index].id,selectedGames[index].difficulty,  selectedGames[index].name)
+    }
+    className="btn btn-primary"
+  >
+    Starta spel
+  </a>
+)}
      </div>
    </div>
  
