@@ -7,7 +7,7 @@ import Alerts from "../components/Alerts";
 import APIAlert from "../components/APIAlert";
 
 // hämta onRegister från LandingPage
-function RegisterNewUser({ toggleModal }) {
+function RegisterNewUser({ toggleModal, onRegister }) {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -46,6 +46,8 @@ function RegisterNewUser({ toggleModal }) {
     if (createNewUser.response) {
       if (createNewUser.response.status === 200) {
         console.log(createNewUser.response);
+        // skicka "confirm" till confirmRegister-setAlert
+        onRegister("Ditt kontot har blivit skapat");
         toggleModal();
       } else if (
         createNewUser.response.status === 404 ||

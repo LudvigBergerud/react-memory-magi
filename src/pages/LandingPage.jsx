@@ -24,16 +24,10 @@ function Landingpage() {
   const [isModalVisible, setModalVisible] = useState(false);
   const [isModalVisibleForgott, setModalVisibleForgott] = useState(false);
 
-  // spara username, email, password i en variabel / objekt
-  const [newUser, setnewUser] = useState({
-    email: "",
-    password: "",
-  });
-
-  // Hämta objekt från RegisterNewUser component till createUser d
+  // Hämta objekt från RegisterNewUser component till createUser & Ta emot från Register
   const confirmRegister = (createUser) => {
-    setnewUser(createUser);
     console.log("Ny user: ", createUser);
+    setAlert(createUser); // Ta emot o sätt sträng
     toggleSignUpModal();
     setModalVisible(false);
   };
