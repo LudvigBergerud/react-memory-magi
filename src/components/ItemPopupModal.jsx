@@ -15,6 +15,8 @@ const ItemPopupModal = ({ show, handleClose, handleSave }) => {
         };
 
         handleSave(cardData); 
+        setCardName(''); 
+        setImageLink(''); 
         handleClose(); 
     };
 
@@ -44,7 +46,7 @@ const ItemPopupModal = ({ show, handleClose, handleSave }) => {
                                 onChange={(e) => setImageLink(e.target.value)}
                             />
                         </Form.Group>
-                        <Button variant="primary" type="submit">
+                        <Button variant="primary" type="submit" className="create-primary-button">
                             Skapa Kort
                         </Button>
                     </div>
@@ -53,7 +55,7 @@ const ItemPopupModal = ({ show, handleClose, handleSave }) => {
                             {imageLink ? (
                                 <img src={imageLink} alt={cardName} />
                             ) : (
-                                <div style={{ height: '150px', width: '100%', backgroundColor: '#cccccc', borderRadius: '10px' }}></div>
+                                <div className="placeholder"></div>
                             )}
                             <div className="card-name">{cardName || "Förhandsgranskning"}</div>
                         </div>
@@ -65,4 +67,3 @@ const ItemPopupModal = ({ show, handleClose, handleSave }) => {
 };
 
 export default ItemPopupModal;
-
