@@ -5,6 +5,7 @@ import "../styles/Result.css";
 import star from "../assets/Mario-Star.png";
 import useFetch from "../hooks/useFetch";
 import AchievementModal from "../components/AchievementModal";
+import achievementImages from "../utils/AchievementImages";
 
 function Result() {
   const location = useLocation();
@@ -14,6 +15,7 @@ function Result() {
   const [sortedLeaderboard, setSortedLeaderboard] = useState([]);
   const [user, setUser] = useState(null);
   const [time, setTime] = useState(null);
+  const [timePB, setTimePB] = useState(null);
   const [resultData, setResultData] = useState(null);
   const [placementNumber, setPlacementNumber] = useState(0);
   const [currentResult, setCurrentResult] = useState(null);
@@ -168,6 +170,17 @@ function Result() {
   }, [sortedLeaderboard, user]);
 
   useEffect(() => {
+    if (user) {
+      sortedLeaderboard.forEach((entry) => {
+        if (entry.userId === user.userId) {
+          setTimePB(entry.time);
+          return;
+        }
+      });
+    }
+  }, [sortedLeaderboard, user]);
+
+  useEffect(() => {
     const fetchAndUpdateAchievements = async () => {
       if (user && resultData) {
         const unlockedAchievements = await updateUserAchievements(
@@ -186,7 +199,8 @@ function Result() {
   }, [user, resultData]);
 
   const handlePlayAgain = () => {
-    navigate("/game"); // Navigate to /game
+    var gameData = { gameId: currentResult.gameId };
+    navigate("/game", { state: { gameData } });
   };
 
   const handlePlayAnotherGame = () => {
@@ -215,7 +229,10 @@ function Result() {
           </p>
           <p>
             {placementNumber !== 0
-              ? "Du är top " + placementNumber + " i världen!"
+              ? "Du är top " +
+                placementNumber +
+                " i världen med tiden: " +
+                timePB
               : ""}{" "}
           </p>
           <p className="leaderboard-title">TOPPLISTA</p>
@@ -283,6 +300,7 @@ function Result() {
             isOpen={isModalOpen}
             onClose={handleCloseModal}
             achievement={unlockedAchievements[currentAchievementIndex]}
+            images={achievementImages}
           />
         )}
       </div>
