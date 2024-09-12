@@ -24,16 +24,10 @@ function Landingpage() {
   const [isModalVisible, setModalVisible] = useState(false);
   const [isModalVisibleForgott, setModalVisibleForgott] = useState(false);
 
-  // spara username, email, password i en variabel / objekt
-  const [newUser, setnewUser] = useState({
-    email: "",
-    password: "",
-  });
-
-  // Hämta objekt från RegisterNewUser component till createUser d
+  // Hämta objekt från RegisterNewUser component till createUser & Ta emot från Register
   const confirmRegister = (createUser) => {
-    setnewUser(createUser);
     console.log("Ny user: ", createUser);
+    setAlert(createUser); // Ta emot o sätt sträng
     toggleSignUpModal();
     setModalVisible(false);
   };
@@ -101,6 +95,7 @@ function Landingpage() {
               </div>
               <div className="centerInputs">
                 <input
+                  id="username"
                   type="text"
                   placeholder="Användarnamn"
                   value={email}
@@ -109,6 +104,7 @@ function Landingpage() {
                 <br />
                 <br />
                 <input
+                  id="password"
                   type="password"
                   placeholder="Lösenord"
                   value={password}
@@ -116,17 +112,29 @@ function Landingpage() {
                 />
                 <br />
                 <br />
-                <button className="roundButton" onClick={toggleSignUpModal}>
+                <button
+                  id="createAccountButton"
+                  className="roundButton"
+                  onClick={toggleSignUpModal}
+                >
                   Skapa konto
                 </button>{" "}
-                <button className="roundButton" onClick={handleLogIn}>
+                <button
+                  id="loginButton"
+                  className="roundButton"
+                  onClick={handleLogIn}
+                >
                   Logga in
                 </button>
                 {alert !== "" ? <Alerts alert={alert} /> : ""}
                 {alertAPI !== "" ? <APIAlert alert={alertAPI} /> : ""}
                 <br />
                 <br />
-                <button className="roundButton" onClick={toggleForgottPassword}>
+                <button
+                  id="forgottPasswordButton"
+                  className="roundButton"
+                  onClick={toggleForgottPassword}
+                >
                   Glömt lösenord?{" "}
                 </button>
               </div>
