@@ -39,7 +39,13 @@ function Navbar() {
       {/* TODO: IMPLEMENT ERROR HANDLING. */}
       <div id="nav-container" className="fixed-top">
         <div id="brand-wrapper">
-          <NavLink to="Home">
+          <NavLink
+            to="/"
+            id="navbar-home-link"
+            className={({ isActive }) =>
+              isActive ? "active-link" : "inactive-link"
+            }
+          >
             {" "}
             <House className="icon" /> <span>Hem</span>
           </NavLink>
@@ -48,15 +54,27 @@ function Navbar() {
           <>
             {" "}
             <div id="navlinks-wrapper">
-              <NavLink to="/create">
+              <NavLink
+                to="/create"
+                id="navbar-create-link"
+                className={({ isActive }) =>
+                  isActive ? "active-link" : "inactive-link"
+                }
+              >
                 <PlusLg className="icon" />
                 <span>Skapa spel</span>
               </NavLink>
-              <NavLink to="/profile">
+              <NavLink
+                to="/profile"
+                id="navbar-profile-link"
+                className={({ isActive }) =>
+                  isActive ? "active-link" : "inactive-link"
+                }
+              >
                 <PersonCircle />
                 <span>Profil</span>
               </NavLink>
-              <a onClick={handleLogOut}>
+              <a onClick={handleLogOut} id="navbar-logout-link">
                 <BoxArrowRight className="icon" /> <span>Logga ut</span>
               </a>
             </div>
