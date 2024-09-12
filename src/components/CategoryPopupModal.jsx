@@ -104,7 +104,7 @@ const CategoryPopupModal = ({ show, handleClose, handleSave, category, showMessa
                             ) : (
                                 <div className="placeholder">Ingen Bild</div>
                             )}
-                            <div className="category-name">{name || "Förhandsgranskning av namn"}</div>
+                            <div className="category-name">{name || "Förhandsgranskning"}</div>
                         </div>
                     </div>
                 </Form>

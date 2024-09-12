@@ -3,21 +3,24 @@ import { useNavigate } from "react-router-dom";
 import { Modal } from "react-bootstrap";
 import ItemPopupModal from "../components/ItemPopupModal";
 import CategoryPopupModal from "../components/CategoryPopupModal";
+import InviteUsersModal from "../components/InviteUsersModal";
 import "../styles/Create.css";
 
 function Create() {
-  const [categories, setCategories] = useState([]); 
-  const [games, setGames] = useState([]);  
+  const [categories, setCategories] = useState([]);
+  const [games, setGames] = useState([]);
   const [difficultyLevels, setDifficultyLevels] = useState([]);
   const [selectedDifficultyLevel, setSelectedDifficultyLevel] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [gameType, setGameType] = useState("");
+  const [gameType, setGameType] = useState(""); 
   const [gameName, setGameName] = useState("");
   const [cards, setCards] = useState([]);
+  const [invitedUsers, setInvitedUsers] = useState([]); 
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false); 
   const [showErrorModal, setShowErrorModal] = useState(false);
 
   const navigate = useNavigate();
@@ -52,38 +55,44 @@ function Create() {
     }
 
     try {
-      const categoriesResponse = await fetch("https://localhost:7259/api/category/GetCategories", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const categoriesResponse = await fetch(
+        "https://localhost:7259/api/category/GetCategories",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
-      if (!categoriesResponse.ok) throw new Error("Failed to fetch categories.");
+      if (!categoriesResponse.ok)
+        throw new Error("Failed to fetch categories.");
 
       const categoriesData = await categoriesResponse.json();
-      setCategories(categoriesData || []); 
+      setCategories(categoriesData || []);
 
-      const gamesResponse = await fetch("https://localhost:7259/api/game/GetAllGames", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const gamesResponse = await fetch(
+        "https://localhost:7259/api/game/GetAllGames",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (!gamesResponse.ok) throw new Error("Failed to fetch games.");
       const gamesData = await gamesResponse.json();
       setGames(gamesData);
-
     } catch (error) {
       handleShowError(`Fel vid hämtning av data: ${error.message}`);
     }
-  }, [navigate]); 
+  }, [navigate]);
 
   useEffect(() => {
-    fetchCategoriesAndGames(); 
+    fetchCategoriesAndGames();
 
     const accessTokenString = localStorage.getItem("accessToken");
     const accessTokenData = accessTokenString
@@ -100,10 +109,12 @@ function Create() {
     })
       .then((response) => response.json())
       .then((data) => {
-        setDifficultyLevels(data || []); 
+        setDifficultyLevels(data || []);
       })
       .catch((error) =>
-        handleShowError(`Fel vid hämtning av svårighetsgrader: ${error.message}`)
+        handleShowError(
+          `Fel vid hämtning av svårighetsgrader: ${error.message}`
+        )
       );
   }, [fetchCategoriesAndGames]);
 
@@ -135,10 +146,23 @@ function Create() {
     setShowCategoryModal(false);
   };
 
+  const handleSaveInvites = (users) => {
+    setInvitedUsers(users);
+  };
+
   const handleRemoveCard = (indexToRemove) => {
     setCards((prevCards) =>
       prevCards.filter((_, index) => index !== indexToRemove)
     );
+  };
+
+  const handleGameTypeChange = (e) => {
+    const selectedGameType = e.target.value;
+    setGameType(selectedGameType);
+
+    if (selectedGameType === "public") {
+      setInvitedUsers([]);
+    }
   };
 
   const handleSubmitGame = async (e) => {
@@ -200,6 +224,10 @@ function Create() {
       difficultyLevelId: selectedDifficultyLevel,
       gameType: gameType,
       items: cards,
+      allowedUsers:
+        gameType === "private"
+          ? invitedUsers.map((user) => ({ userId: user.userId }))
+          : [], 
     };
 
     const accessTokenString = localStorage.getItem("accessToken");
@@ -209,7 +237,9 @@ function Create() {
     const accessToken = accessTokenData ? accessTokenData.accessToken : null;
 
     if (!accessToken) {
-      handleShowError("Ingen giltig access token hittades. Vänligen logga in igen.");
+      handleShowError(
+        "Ingen giltig access token hittades. Vänligen logga in igen."
+      );
       navigate("/landingpage");
       return;
     }
@@ -246,13 +276,24 @@ function Create() {
   const openCategoryModal = () => setShowCategoryModal(true);
   const closeCategoryModal = () => setShowCategoryModal(false);
 
+  const openInviteModal = () => setShowInviteModal(true);
+  const closeInviteModal = () => setShowInviteModal(false);
+
   return (
     <div className="create-container">
       <div className="create-button-group">
         <button onClick={openModal} className="create-primary-button">
           Lägg till nytt kort
         </button>
-        <button onClick={openCategoryModal} className="create-secondary-button">
+        {gameType === "private" && (
+          <button onClick={openInviteModal} className="create-secondary-button">
+            Bjud in användare
+          </button>
+        )}
+        <button
+          onClick={openCategoryModal}
+          className="create-secondary-button"
+        >
           Skapa ny kategori
         </button>
       </div>
@@ -273,7 +314,8 @@ function Create() {
           <label>Speltyp:</label>
           <select
             value={gameType}
-            onChange={(e) => setGameType(e.target.value)}
+            onChange={handleGameTypeChange}
+            required
           >
             <option value="">Välj Speltyp</option>
             <option value="public">Offentligt</option>
@@ -320,6 +362,12 @@ function Create() {
             )}
           </select>
         </div>
+
+        {gameType === "private" && invitedUsers.length > 0 && (
+          <div className="create-form-group">
+            <p>Antal inbjudna användare: {invitedUsers.length}</p>
+          </div>
+        )}
 
         <button type="submit" className="create-submit-button">
           Skapa spel
@@ -370,12 +418,15 @@ function Create() {
         categories={categories}
       />
 
-      <Modal
-        show={showErrorModal}
-        onHide={handleCloseError}
-        centered
-        dialogClassName="modal-dialog-centered"
-      >
+      <InviteUsersModal
+        show={showInviteModal}
+        handleClose={closeInviteModal}
+        handleSaveInvites={handleSaveInvites}
+        currentInvitedUsers={invitedUsers}
+        showMessage={handleShowError}
+      />
+
+      <Modal show={showErrorModal} onHide={handleCloseError} centered>
         <Modal.Header closeButton>
           <Modal.Title>{error ? "Fel" : "Meddelande"}</Modal.Title>
         </Modal.Header>
