@@ -25,6 +25,7 @@ function ForgotPassword({ toggleForgottModal }) {
               Skriv in er Email adress - begär hjälp - kolla er inbox direkt!
             </p>
             <input
+              id="forgottPasswordInput" // lagt till id
               type="text"
               placeholder="Email adress"
               value={email}
@@ -33,7 +34,11 @@ function ForgotPassword({ toggleForgottModal }) {
             {alert !== "" ? <Alerts alert={alert} /> : ""}
             <br />
             <br />
-            <button className="roundButton" onClick={closeTheModalButton}>
+            <button
+              id="forgottPasswordButton"
+              className="roundButton"
+              onClick={closeTheModalButton}
+            >
               Begär hjälp
             </button>
           </div>
