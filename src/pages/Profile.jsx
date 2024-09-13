@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "../styles/Profile.css";
 import useFetch from "../hooks/useFetch";
-//Seed data
+import achievementImages from "../utils/AchievementImages";
 
 function Profile() {
   const [earnedAchievements, setEarnedAchievements] = useState(null);
@@ -64,6 +64,7 @@ function Profile() {
             (achievement) => !userAchievementIds.includes(achievement.id)
           )
         );
+        console.log("Unearned: ", unearnedAchievements);
         setEarnedAchievements(
           fetchAchievementHandler.data.filter((achievement) =>
             userAchievementIds.includes(achievement.id)
@@ -218,16 +219,22 @@ function Profile() {
                             }
                             onMouseLeave={handleMouseLeave}
                           >
-                            {achievement.name}
+                            <img
+                              src={achievementImages[achievement.imageUrl]}
+                              alt={achievement.name}
+                              className="profile-achievement-image"
+                            />
                             {visibleTooltip === achievement.id && (
                               <div
                                 className="custom-tooltip"
                                 style={{
                                   position: "fixed",
                                   top: tooltipPosition.top + 50,
-                                  left: tooltipPosition.left,
+                                  left: tooltipPosition.left + 25,
                                 }}
                               >
+                                {achievement.name}
+                                <br />
                                 {achievement.description}
                               </div>
                             )}
@@ -237,7 +244,7 @@ function Profile() {
                   </div>
                 </div>
 
-                <div className="achievements-not-earned mt-4">
+                <div className="achievements-not-earned mt-4 mb-4">
                   <h3>Låsta Medaljer</h3>
                   <div className="achievements-grid">
                     {unearnedAchievements
@@ -250,16 +257,22 @@ function Profile() {
                             }
                             onMouseLeave={handleMouseLeave}
                           >
-                            {achievement.name}
+                            <img
+                              src={achievementImages[achievement.imageUrl]}
+                              alt={achievement.name}
+                              className="profile-achievement-image"
+                            />
                             {visibleTooltip === achievement.id && (
                               <div
                                 className="custom-tooltip"
                                 style={{
                                   position: "fixed",
                                   top: tooltipPosition.top + 50,
-                                  left: tooltipPosition.left,
+                                  left: tooltipPosition.left + 25,
                                 }}
                               >
+                                {achievement.name}
+                                <br />
                                 {achievement.description}
                               </div>
                             )}

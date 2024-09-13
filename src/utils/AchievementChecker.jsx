@@ -12,10 +12,10 @@ export const checkResultAchievements = async (user, result) => {
   const userResults = allResults.filter(
     (result) => result.userId === user.userId
   );
-
+  console.log(allResults);
   const updatedAchievements = [];
 
-  // Now check for each unachieved achievement manually
+  // Check for each unachieved achievement
   allAchievements.forEach((achievement) => {
     if (!userAchievementIds.includes(achievement.id)) {
       let unlocked = false;
@@ -29,46 +29,59 @@ export const checkResultAchievements = async (user, result) => {
           break;
 
         case 2:
-          // Check if the user has completed their second game
-          if (userResults.length >= 2) {
+          // Check if the user has completed 5 games or more
+          if (userResults.length >= 5) {
             unlocked = true;
           }
           break;
 
         case 3:
-          // Check if the user has completed more than 10 games
-          if (userResults.length > 10) {
+          // Check if the user has completed 20 games or more
+          if (userResults.length >= 20) {
             unlocked = true;
           }
           break;
 
         case 4:
-          // Check if the user has completed the first 'easy' level
-
+          // Check if the user has completed 100 games or more
+          if (userResults.length >= 100) {
+            unlocked = true;
+          }
           break;
 
         case 5:
-          // Check if the user has won their first game
+          userResults.forEach((result) => {
+            // Convert the time string to seconds
+            const timeParts = result.time.split(":");
+            const totalSeconds =
+              parseInt(timeParts[0], 10) * 3600 + // hours to seconds
+              parseInt(timeParts[1], 10) * 60 + // minutes to seconds
+              parseInt(timeParts[2], 10); // seconds
 
+            // Check if the total time is less than 300 seconds (5 min)
+            if (totalSeconds <= 300) {
+              unlocked = true;
+            }
+          });
           break;
 
         case 6:
-          // Check if the user has taken first steps toward mastery, e.g., reaching a certain skill level or winning a series of games
+          userResults.forEach((result) => {
+            // Convert the time string to seconds
+            const timeParts = result.time.split(":");
+            const totalSeconds =
+              parseInt(timeParts[0], 10) * 3600 + // hours to seconds
+              parseInt(timeParts[1], 10) * 60 + // minutes to seconds
+              parseInt(timeParts[2], 10); // seconds
 
+            // Check if the total time is less than 60 seconds
+            if (totalSeconds <= 60) {
+              unlocked = true;
+            }
+          });
           break;
 
         case 7:
-          // Check if the user has completed the 'medium' level
-
-          break;
-
-        case 8:
-          // Check if the user has achieved a perfect score in a game
-
-          break;
-
-        case 9:
-          // Check if the user has achieved a time lower than 30 seconds
           userResults.forEach((result) => {
             // Convert the time string to seconds
             const timeParts = result.time.split(":");
@@ -84,9 +97,31 @@ export const checkResultAchievements = async (user, result) => {
           });
           break;
 
-        case 10:
-          // Check if the user has completed the entire game
+        case 8:
+          userResults.forEach((result) => {
+            // Check if the user has completed a game of difficulty "Lätt"
+            if (result.difficultyLevelName === "Lätt") {
+              unlocked = true;
+            }
+          });
+          break;
 
+        case 9:
+          userResults.forEach((result) => {
+            // Check if the user has completed a game of difficulty "Medium"
+            if (result.difficultyLevelName === "Medium") {
+              unlocked = true;
+            }
+          });
+          break;
+
+        case 10:
+          userResults.forEach((result) => {
+            // Check if the user has completed a game of difficulty "Svår"
+            if (result.difficultyLevelName === "Svår") {
+              unlocked = true;
+            }
+          });
           break;
 
         // Add more cases here in the future with more achievements
@@ -98,7 +133,9 @@ export const checkResultAchievements = async (user, result) => {
         updatedAchievements.push({
           achievementId: achievement.id,
           name: achievement.name,
+          description: achievement.description,
           AchievementDate: new Date().toISOString().split("T")[0],
+          imageUrl: achievement.imageUrl,
         });
       }
     }
@@ -175,7 +212,7 @@ export const fetchAllResults = async (result) => {
   const accessToken = tokenObject?.accessToken;
 
   const response = await fetch(
-    `https://localhost:7259/api/Result/GetAllResults`,
+    `https://localhost:7259/api/Result/GetAllResultsWithIncludedData?currentResultId=${result.id}`,
     {
       method: "GET",
       headers: {
