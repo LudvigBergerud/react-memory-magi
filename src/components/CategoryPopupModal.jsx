@@ -1,36 +1,46 @@
 import React, { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 
-const CategoryPopupModal = ({ show, handleClose, handleSave, category }) => {
+const CategoryPopupModal = ({ show, handleClose, handleSave, category, showMessage, categories }) => {
     const [name, setName] = useState(category ? category.name : '');
     const [image, setImage] = useState(category ? category.image : '');
-    const [validated, setValidated] = useState(false);
 
-    const saveCategory = async (event) => {
-        const form = event.currentTarget;
-        if (form.checkValidity() === false) {
-            event.preventDefault();
-            event.stopPropagation();
-            setValidated(true);
+    const handleSubmitCategory = async (e) => {
+        e.preventDefault();
+
+        const categoryData = { 
+            name: name.trim(), 
+            image: image.trim() 
+        };
+
+        if (!categoryData.name || !categoryData.image) {
+            showMessage('Alla fält måste vara ifyllda.');
             return;
         }
 
-        event.preventDefault();
+        const isDuplicateCategory = categories.some(
+            (cat) => {
+                return cat?.name && cat.name.toLowerCase() === categoryData.name.toLowerCase();
+            }
+        );
 
-        const categoryData = { name, image };
+        if (isDuplicateCategory) {
+            showMessage('En kategori med samma namn finns redan.');
+            return;
+        }
 
         const accessTokenString = localStorage.getItem('accessToken');
         const accessTokenData = accessTokenString ? JSON.parse(accessTokenString) : null;
         const accessToken = accessTokenData ? accessTokenData.accessToken : null;
 
         if (!accessToken) {
-            console.error('Ingen giltig access token hittades. Vänligen logga in igen.');
+            showMessage('Ingen giltig access token hittades. Vänligen logga in igen.');
             return;
         }
 
         try {
-            const response = await fetch(category ? `https://localhost:7259/api/category/${category.id}` : 'https://localhost:7259/api/category', {
-                method: category ? 'PUT' : 'POST',
+            const response = await fetch('https://localhost:7259/api/category', {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${accessToken}`,
@@ -40,30 +50,29 @@ const CategoryPopupModal = ({ show, handleClose, handleSave, category }) => {
 
             if (!response.ok) {
                 const errorText = await response.text();
-                throw new Error(`Error saving category: ${errorText}`);
+                showMessage(`Fel vid sparande av kategori: ${errorText}`);
+                return;
             }
 
-            const data = await response.json();
-            console.log('Category saved successfully:', data);
-            handleSave(data);
-            handleClose();
+            const savedCategory = await response.json();
 
+            handleSave(savedCategory); 
+            showMessage('Kategorin sparades');
+            setName(''); 
+            setImage(''); 
+            handleClose(); 
         } catch (error) {
-            console.error('Error saving category:', error.message);
+            showMessage(`Fel vid sparande av kategori: ${error.message}`);
         }
     };
 
-    const handleRemoveImage = () => {
-        setImage('');
-    };
-
     return (
-        <Modal show={show} onHide={handleClose}>
+        <Modal show={show} onHide={handleClose} centered>
             <Modal.Header closeButton>
                 <Modal.Title>{category ? 'Redigera Kategori' : 'Skapa Kategori'}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Form noValidate validated={validated} onSubmit={saveCategory}>
+                <Form onSubmit={handleSubmitCategory} className="form-section">
                     <Form.Group controlId="formCategoryName">
                         <Form.Label>Namn</Form.Label>
                         <Form.Control 
@@ -73,9 +82,6 @@ const CategoryPopupModal = ({ show, handleClose, handleSave, category }) => {
                             placeholder="Ange kategorinamn"
                             required
                         />
-                        <Form.Control.Feedback type="invalid">
-                            Fyll i det här fältet.
-                        </Form.Control.Feedback>
                     </Form.Group>
                     <Form.Group controlId="formCategoryImage">
                         <Form.Label>Bild URL</Form.Label>
@@ -86,10 +92,11 @@ const CategoryPopupModal = ({ show, handleClose, handleSave, category }) => {
                             placeholder="Ange bildens URL"
                             required
                         />
-                        <Form.Control.Feedback type="invalid">
-                            Fyll i det här fältet.
-                        </Form.Control.Feedback>
                     </Form.Group>
+                    <Button variant="primary" type="submit" className="create-primary-button">
+                        Spara Kategori
+                    </Button>
+
                     <div className="category-preview">
                         <div className="category-card">
                             {image ? (
@@ -97,24 +104,11 @@ const CategoryPopupModal = ({ show, handleClose, handleSave, category }) => {
                             ) : (
                                 <div className="placeholder">Ingen Bild</div>
                             )}
-                            <div className="category-name">{name || "Förhandsvisning av namn"}</div>
-                            {image && (
-                                <button 
-                                    className="remove-image-button" 
-                                    onClick={handleRemoveImage}
-                                >
-                                    ×
-                                </button>
-                            )}
+                            <div className="category-name">{name || "Förhandsgranskning av namn"}</div>
                         </div>
                     </div>
                 </Form>
             </Modal.Body>
-            <Modal.Footer>
-                <Button variant="primary" type="submit" onClick={saveCategory}>
-                    Spara Kategori
-                </Button>
-            </Modal.Footer>
         </Modal>
     );
 };

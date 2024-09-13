@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Modal } from "react-bootstrap";
 import ItemPopupModal from "../components/ItemPopupModal";
@@ -6,20 +6,39 @@ import CategoryPopupModal from "../components/CategoryPopupModal";
 import "../styles/Create.css";
 
 function Create() {
-  const [categories, setCategories] = useState([]);
-  const [selectedDifficultyLevel, setSelectedDifficultyLevel] = useState("");
+  const [categories, setCategories] = useState([]); 
+  const [games, setGames] = useState([]);  
+  const [difficultyLevels, setDifficultyLevels] = useState([]);
+  const [selectedDifficultyLevel, setSelectedDifficultyLevel] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [gameType, setGameType] = useState("");
   const [gameName, setGameName] = useState("");
   const [cards, setCards] = useState([]);
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
 
   const navigate = useNavigate();
 
-  useEffect(() => {
+  const handleShowError = (message) => {
+    setError(message);
+    setShowErrorModal(true);
+  };
+
+  const handleShowMessage = (message) => {
+    setMessage(message);
+    setShowErrorModal(true);
+  };
+
+  const handleCloseError = () => {
+    setShowErrorModal(false);
+    setError("");
+    setMessage("");
+  };
+
+  const fetchCategoriesAndGames = useCallback(async () => {
     const accessTokenString = localStorage.getItem("accessToken");
     const accessTokenData = accessTokenString
       ? JSON.parse(accessTokenString)
@@ -32,7 +51,47 @@ function Create() {
       return;
     }
 
-    fetch("https://localhost:7259/api/category/GetCategories", {
+    try {
+      const categoriesResponse = await fetch("https://localhost:7259/api/category/GetCategories", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!categoriesResponse.ok) throw new Error("Failed to fetch categories.");
+
+      const categoriesData = await categoriesResponse.json();
+      setCategories(categoriesData || []); 
+
+      const gamesResponse = await fetch("https://localhost:7259/api/game/GetAllGames", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!gamesResponse.ok) throw new Error("Failed to fetch games.");
+      const gamesData = await gamesResponse.json();
+      setGames(gamesData);
+
+    } catch (error) {
+      handleShowError(`Fel vid hämtning av data: ${error.message}`);
+    }
+  }, [navigate]); 
+
+  useEffect(() => {
+    fetchCategoriesAndGames(); 
+
+    const accessTokenString = localStorage.getItem("accessToken");
+    const accessTokenData = accessTokenString
+      ? JSON.parse(accessTokenString)
+      : null;
+    const accessToken = accessTokenData ? accessTokenData.accessToken : null;
+
+    fetch("https://localhost:7259/api/difficultylevel/GetAllDifficultyLevels", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -41,31 +100,38 @@ function Create() {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("Categories API Response:", data);
-        setCategories(Array.isArray(data) ? data : []);
+        setDifficultyLevels(data || []); 
       })
       .catch((error) =>
-        handleShowError(`Fel vid hämtning av kategorier: ${error.message}`)
+        handleShowError(`Fel vid hämtning av svårighetsgrader: ${error.message}`)
       );
-  }, [navigate]);
+  }, [fetchCategoriesAndGames]);
 
-  const handleShowError = (message) => {
-    setError(message);
-    setShowErrorModal(true);
-  };
-
-  const handleCloseError = () => {
-    setShowErrorModal(false);
+  const isDuplicateCard = (newCard) => {
+    return cards.some(
+      (card) =>
+        card.name.toLowerCase() === newCard.name.toLowerCase() ||
+        card.image === newCard.image
+    );
   };
 
   const handleSaveCard = (newCard) => {
+    if (isDuplicateCard(newCard)) {
+      handleShowError("Kortet med samma namn eller bild URL finns redan.");
+      return;
+    }
     newCard.gameId = -1;
     setCards((prev) => [...prev, newCard]);
     setShowModal(false);
   };
 
   const handleSaveCategory = (newCategory) => {
-    setCategories((prev) => [...prev, newCategory]);
+    if (!newCategory.name.trim()) {
+      handleShowError("Kategorinamn måste anges.");
+      return;
+    }
+
+    fetchCategoriesAndGames();
     setShowCategoryModal(false);
   };
 
@@ -77,16 +143,53 @@ function Create() {
 
   const handleSubmitGame = async (e) => {
     e.preventDefault();
-    debugger;
+
+    if (!categories || !categories.length) {
+      handleShowError("Inga kategorier tillgängliga.");
+      return;
+    }
+
+    if (!difficultyLevels || !difficultyLevels.length) {
+      handleShowError("Inga svårighetsgrader tillgängliga.");
+      return;
+    }
+
+    if (!selectedDifficultyLevel) {
+      handleShowError("Du måste välja en svårighetsgrad.");
+      return;
+    }
+
+    const selectedDifficulty = difficultyLevels.find(
+      (d) => d.id === selectedDifficultyLevel
+    );
+
     if (
-      !gameName.trim() ||
-      !gameType.trim() ||
-      !selectedCategory ||
-      !selectedDifficultyLevel ||
-      cards.length === 0
+      !selectedDifficulty ||
+      typeof selectedDifficulty.nrOfCards === "undefined"
     ) {
       handleShowError(
-        "Alla fält är obligatoriska, och minst ett kort måste associeras med spelet."
+        "Ett fel uppstod vid hämtning av svårighetsgradens information."
+      );
+      return;
+    }
+
+    if (!gameName.trim() || !gameType.trim() || !selectedCategory) {
+      handleShowError("Alla fält är obligatoriska.");
+      return;
+    }
+
+    const isDuplicateGame = games.some(
+      (game) => game.name.toLowerCase() === gameName.toLowerCase()
+    );
+
+    if (isDuplicateGame) {
+      handleShowError("Ett spel med samma namn finns redan.");
+      return;
+    }
+
+    if (cards.length !== selectedDifficulty.nrOfCards) {
+      handleShowError(
+        `Du måste lägga till exakt ${selectedDifficulty.nrOfCards} kort för svårighetsgraden ${selectedDifficulty.name}.`
       );
       return;
     }
@@ -94,7 +197,7 @@ function Create() {
     const gameData = {
       name: gameName,
       categoryId: selectedCategory,
-      difficultyLevelId: parseInt(selectedDifficultyLevel, 10),
+      difficultyLevelId: selectedDifficultyLevel,
       gameType: gameType,
       items: cards,
     };
@@ -106,9 +209,7 @@ function Create() {
     const accessToken = accessTokenData ? accessTokenData.accessToken : null;
 
     if (!accessToken) {
-      handleShowError(
-        "Ingen giltig access token hittades. Vänligen logga in igen."
-      );
+      handleShowError("Ingen giltig access token hittades. Vänligen logga in igen.");
       navigate("/landingpage");
       return;
     }
@@ -129,7 +230,11 @@ function Create() {
         return;
       }
 
-      navigate("/games");
+      handleShowMessage("Spelet skapades!");
+
+      setTimeout(() => {
+        navigate("/Home");
+      }, 3000);
     } catch (error) {
       handleShowError(`Fel vid skapande av spel: ${error.message}`);
     }
@@ -142,29 +247,30 @@ function Create() {
   const closeCategoryModal = () => setShowCategoryModal(false);
 
   return (
-    <div className="container-create">
-      <div className="button-group">
-        <button onClick={openModal} className="btn btn-primary mb-3">
+    <div className="create-container">
+      <div className="create-button-group">
+        <button onClick={openModal} className="create-primary-button">
           Lägg till nytt kort
         </button>
-        <button onClick={openCategoryModal} className="btn btn-secondary mb-3">
+        <button onClick={openCategoryModal} className="create-secondary-button">
           Skapa ny kategori
         </button>
       </div>
 
-      <form onSubmit={handleSubmitGame} className="form-section">
-        <label>
-          Spelnamn:
+      <form onSubmit={handleSubmitGame} className="create-form-section">
+        <div className="create-form-group">
+          <label>Spelnamn:</label>
           <input
-            placeholder="Skriv namn på spel här..."
+            placeholder="Skriv namnet på spelet här..."
             type="text"
             value={gameName}
             onChange={(e) => setGameName(e.target.value)}
             required
           />
-        </label>
-        <label>
-          Speltyp:
+        </div>
+
+        <div className="create-form-group">
+          <label>Speltyp:</label>
           <select
             value={gameType}
             onChange={(e) => setGameType(e.target.value)}
@@ -173,39 +279,82 @@ function Create() {
             <option value="public">Offentligt</option>
             <option value="private">Privat</option>
           </select>
-        </label>
-        <label>
-          Kategori:
+        </div>
+
+        <div className="create-form-group">
+          <label>Kategori:</label>
           <select
             value={selectedCategory || ""}
             onChange={(e) => setSelectedCategory(Number(e.target.value))}
             required
           >
             <option value="">Välj Kategori</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
+            {categories.length > 0 ? (
+              categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name || "Unnamed Category"}
+                </option>
+              ))
+            ) : (
+              <option value="">Inga kategorier tillgängliga</option>
+            )}
           </select>
-        </label>
-        <label>
-          Svårighetsgrad:
+        </div>
+
+        <div className="create-form-group">
+          <label>Svårighetsgrad:</label>
           <select
-            value={selectedDifficultyLevel}
-            onChange={(e) => setSelectedDifficultyLevel(e.target.value)}
+            value={selectedDifficultyLevel || ""}
+            onChange={(e) => setSelectedDifficultyLevel(Number(e.target.value))}
             required
           >
             <option value="">Välj Svårighetsgrad</option>
-            <option value="1">Lätt</option>
-            <option value="2">Medium</option>
-            <option value="3">Svår</option>
+            {difficultyLevels.length > 0 ? (
+              difficultyLevels.map((difficulty) => (
+                <option key={difficulty.id} value={difficulty.id}>
+                  {difficulty.name}
+                </option>
+              ))
+            ) : (
+              <option value="">Inga svårighetsgrader tillgängliga</option>
+            )}
           </select>
-        </label>
-        <button type="submit" className="btn btn-success">
+        </div>
+
+        <button type="submit" className="create-submit-button">
           Skapa spel
         </button>
+
+        <div className="create-card-count">
+          {selectedDifficultyLevel && (
+            <p>
+              {cards.length}/
+              {difficultyLevels.find((d) => d.id === selectedDifficultyLevel)
+                ?.nrOfCards || 0}{" "}
+              Kort
+            </p>
+          )}
+        </div>
       </form>
+
+      <div className="create-card-list-wrapper">
+        {cards.length > 0 && (
+          <div className="create-card-list-container">
+            {cards.map((card, index) => (
+              <div key={index} className="create-card-list-item">
+                <img src={card.image} alt={card.name} />
+                <div className="create-card-list-item-name">{card.name}</div>
+                <button
+                  className="create-remove-card-button"
+                  onClick={() => handleRemoveCard(index)}
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       <ItemPopupModal
         show={showModal}
@@ -217,36 +366,22 @@ function Create() {
         show={showCategoryModal}
         handleClose={closeCategoryModal}
         handleSave={handleSaveCategory}
+        showMessage={handleShowMessage}
+        categories={categories}
       />
 
-      <Modal show={showErrorModal} onHide={handleCloseError}>
+      <Modal
+        show={showErrorModal}
+        onHide={handleCloseError}
+        centered
+        dialogClassName="modal-dialog-centered"
+      >
         <Modal.Header closeButton>
-          <Modal.Title>Fel</Modal.Title>
+          <Modal.Title>{error ? "Fel" : "Meddelande"}</Modal.Title>
         </Modal.Header>
-        <Modal.Body>{error}</Modal.Body>
-        <Modal.Footer>
-          <button className="btn btn-secondary" onClick={handleCloseError}>
-            Stäng
-          </button>
-        </Modal.Footer>
+        <Modal.Body>{error || message}</Modal.Body>
+        <Modal.Footer></Modal.Footer>
       </Modal>
-
-      {cards.length > 0 && (
-        <div className="card-list-container">
-          {cards.map((card, index) => (
-            <div key={index} className="card-list-item">
-              <img src={card.image} alt={card.name} />
-              <div className="card-list-item-name">{card.name}</div>
-              <button
-                className="remove-card-button"
-                onClick={() => handleRemoveCard(index)}
-              >
-                ×
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

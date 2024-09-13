@@ -11,28 +11,20 @@ function Game() {
   const [flippedcards, setNewflipState] = useState({});
   const [listOfFlippedCards, setList] = useState([]);
   const [time, setTime] = useState(0);
-  const [resultTime, setResultTime] = useState(0);
   const navigate = useNavigate();
   const [isRunning, setIsRunning] = useState(true);
   const [error, setError] = useState("");
+  const [gameLoaded, setGameLoaded] = useState(false);
 
   let gameId = gameData?.gameId; //Denna behöver routas in beroende på vilket spel användare väljer
-  let difficulty = gameData?.difficultyLevel; // Samma som ovan, routas in från quiz home page sidan, tillfällig variabel.
-  let userId = "new_user_id"; //samma som ovan, tillfällig variabel
-  // console.log(location.state);
-  //console.log(gameData);
-  //console.log("Objekt från HOME:"+gameData + JSON.stringify(gameData));
-  //console.log(categoryId);
 
   const tokenObjectString = localStorage.getItem("accessToken");
   const tokenObject = tokenObjectString ? JSON.parse(tokenObjectString) : null;
   const accessToken = tokenObject?.accessToken;
 
   useEffect(() => {
-    if (items.length === 0 && isRunning === false) {
+    if (items.length === 0 && gameLoaded === true) {
       EndGame();
-      console.log("The list is now empty.");
-      // You can perform any other actions here, e.g., show a victory message, reset the game, etc.
     }
   }, [items]);
 
@@ -96,6 +88,7 @@ function Game() {
           }
           setItems(doubledItems);
           console.log(doubledItems);
+          setGameLoaded(true);
         })
         .catch((error) => {
           setError("Anslutning till servern verkar ej vara möjlig");
@@ -148,10 +141,14 @@ function Game() {
           setList([]);
         }, 2250);
       }
+
+ 
     }
   }, [flippedcards]);
 
   const EndGame = () => {
+    setIsRunning(false);
+      
     const hours = String(Math.floor((time / 3600000) % 24)).padStart(2, "0");
     const minutes = String(Math.floor((time / 60000) % 60)).padStart(2, "0");
     const seconds = String(Math.floor((time % 60000) / 1000)).padStart(2, "0");

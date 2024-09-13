@@ -7,7 +7,7 @@ import Alerts from "../components/Alerts";
 import APIAlert from "../components/APIAlert";
 
 // hämta onRegister från LandingPage
-function RegisterNewUser({ toggleModal }) {
+function RegisterNewUser({ toggleModal, onRegister }) {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -46,6 +46,8 @@ function RegisterNewUser({ toggleModal }) {
     if (createNewUser.response) {
       if (createNewUser.response.status === 200) {
         console.log(createNewUser.response);
+        // skicka "confirm" till confirmRegister-setAlert
+        onRegister("Ditt kontot har blivit skapat");
         toggleModal();
       } else if (
         createNewUser.response.status === 404 ||
@@ -65,18 +67,21 @@ function RegisterNewUser({ toggleModal }) {
       <div className="modalComponent">
         <p>Registera era uppgifter</p>
         <input
+          id="username"
           type="text"
           placeholder="Användarnamn"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
         <input
+          id="email"
           type="text"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
         <input
+          id="password"
           type="password"
           placeholder="Lösnord"
           value={password}
