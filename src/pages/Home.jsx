@@ -118,13 +118,13 @@ console.log(authHandler.isAuthenticated);
 }))
 .map((category, index) => (
             
-     <div key={category.Id} className="card mb-2 mx-2 col-md-3"style={{ borderRadius: "50px", position:"relative", overflow:"hidden", width:"350px", height:"425px"}} >
+     <div key={category.Id} className="card mb-2 mx-2 col-md-3"style={{ borderRadius: "50px", position:"relative", overflow:"hidden", width:"350px", height:"auto"}} >
   
      <div className="card-body text-center" >
      <h2 className="card-title">{category.Name}</h2>
-     <img   src={Omslagbild} alt="" style={{ width: '100%', height: '60%', borderRadius: '50px' }} />
+     <img   src={category.Image} alt="" style={{ width: '100%', height: '60%', borderRadius: '50px' }} />
         
-        <Dropdown className='mb-2'>
+        <Dropdown className='mb-2 mt-2'>
         <Dropdown.Toggle variant="success">
         {selectedGames[index]?.gameName  || "Välj spel"} 
         </Dropdown.Toggle>
@@ -139,7 +139,7 @@ console.log(authHandler.isAuthenticated);
             }
         })
         .map((game) =>(
-            <Dropdown.Item   key={game.Id}  href="#" onClick={() => handleSelect(game,index)}>
+            <Dropdown.Item key={game.Id}  href="#" onClick={() => handleSelect(game,index)}>
               {game.DifficultyLevel} - {game.Name}
             
       
