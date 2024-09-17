@@ -31,7 +31,11 @@ function Game() {
   const handleFlip = (id, index) => {
     console.log("kortid-:" + id);
     
-    setList([...listOfFlippedCards, id]);
+    if (listOfFlippedCards.some((card) => card.index === index)) {
+      return;
+    }
+
+      setList([...listOfFlippedCards, { id, index }]);
 
     //kolla hur många kort som är flippade
     const flippedCardsCount = Object.keys(flippedcards).filter(
@@ -117,10 +121,10 @@ function Game() {
 
     if (listOfFlippedCards.length === 2) {
       const [firstCard, secondCard] = listOfFlippedCards;
-      console.log("första:" + firstCard); // 10
-      console.log("andra" + secondCard);
+      console.log(firstCard); // 10
+      console.log(secondCard);
 
-      if (firstCard === secondCard) {
+      if (firstCard.id === secondCard.id) {
         console.log("Korten matchar");
 
         setTimeout(() => {
@@ -130,7 +134,7 @@ function Game() {
         //väntar lite till då animation av flippningen sker
         setTimeout(() => {
           setItems((prevItems) =>
-            prevItems.filter((item) => item.id !== firstCard)
+            prevItems.filter((item) => item.id !== firstCard.id)
           );
         }, 2900);
       } else {
