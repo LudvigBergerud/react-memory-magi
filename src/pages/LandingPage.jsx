@@ -53,26 +53,17 @@ function Landingpage() {
   useEffect(() => {
     if (loginHandler.response.status === 200 && loginHandler.data !== null) {
       authHandler.signIn(loginHandler.data);
-      navigate("/home");
+      navigate("/");
     }
   }, [loginHandler.data]);
 
   useEffect(() => {
-    console.log(loginHandler.error);
-    console.log(loginHandler.response);
-
-    if (loginHandler.error !== null) {
+    if (loginHandler.response.status === 401) {
+      setAlert("Hey, fel lösenord eller email. Försök igen!");
+    } else if (loginHandler.error !== null) {
       setAlertAPI(
         "Vi ber om ursäkt, vi har problem med våra servrar. Vi håller på och undersöker detta!"
       );
-    }
-  }, [loginHandler.error]);
-
-  useEffect(() => {
-    console.log(loginHandler.response);
-
-    if (loginHandler.response.status === 401) {
-      setAlert("Hey, fel lösenord eller email. Försök igen!");
     }
   }, [loginHandler.response]);
 
@@ -112,31 +103,35 @@ function Landingpage() {
                 />
                 <br />
                 <br />
-                <button
-                  id="createAccountButton"
-                  className="roundButton"
-                  onClick={toggleSignUpModal}
-                >
-                  Skapa konto
-                </button>{" "}
-                <button
-                  id="loginButton"
-                  className="roundButton"
-                  onClick={handleLogIn}
-                >
-                  Logga in
-                </button>
+                <div className="buttons-container">
+                  <button
+                    id="createAccountButton"
+                    className="roundButton"
+                    onClick={toggleSignUpModal}
+                  >
+                    Skapa konto
+                  </button>{" "}
+                  <button
+                    id="loginButton"
+                    className="roundButton"
+                    onClick={handleLogIn}
+                  >
+                    Logga in
+                  </button>
+                </div>
                 {alert !== "" ? <Alerts alert={alert} /> : ""}
                 {alertAPI !== "" ? <APIAlert alert={alertAPI} /> : ""}
                 <br />
                 <br />
-                <button
-                  id="forgottPasswordButton"
-                  className="roundButton"
-                  onClick={toggleForgottPassword}
-                >
-                  Glömt lösenord?{" "}
-                </button>
+                <div className="forgot-password-button-container">
+                  <button
+                    id="forgottPasswordButton"
+                    className="roundButton"
+                    onClick={toggleForgottPassword}
+                  >
+                    Glömt lösenord?{" "}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

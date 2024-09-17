@@ -55,6 +55,15 @@
   color: white;
 }
 
+.buttons-container {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.forgot-password-button-container {
+  display: flex;
+  justify-content: center;
+}
 .roundButton:hover {
   background-color: #0056b3;
 }
