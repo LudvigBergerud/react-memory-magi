@@ -13,11 +13,21 @@ function Footer() {
         </p>
       </div>
       <div id="footer-links-wrapper">
-        <NavLink to="/FAQ">
+        <NavLink
+          to="/FAQ"
+          className={({ isActive }) =>
+            isActive ? "active-link" : "inactive-link"
+          }
+        >
           <QuestionCircle />
           <span>Vanligt ställda frågor</span>
         </NavLink>
-        <NavLink to="/aboutus">
+        <NavLink
+          to="/aboutus"
+          className={({ isActive }) =>
+            isActive ? "active-link" : "inactive-link"
+          }
+        >
           {" "}
           <InfoCircle />
           <span>Om Oss</span>

@@ -26,7 +26,8 @@
   justify-content: start;
 }
 
-#nav-container a {
+#nav-container a,
+button {
   display: flex;
   align-items: center;
   text-indent: 3px;
@@ -38,9 +39,16 @@
 #navlinks-wrapper a {
   margin: 1rem;
 }
-#nav-container a:hover {
+#nav-container a:hover,
+#navbar-logout-link:hover {
   color: #ff9033;
 }
+
+#navbar-logout-link {
+  background-color: transparent;
+  border: none;
+}
+
 #navbar-dropdown {
   display: none;
 }
@@ -51,6 +59,14 @@
   background-color: transparent;
   border: none;
   color: #e5e5e5;
+}
+
+.active-link {
+  font-weight: bold;
+  text-decoration: underline;
+}
+.inactive-link {
+  text-decoration: none;
 }
 
 @media (max-width: 700px) {

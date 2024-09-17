@@ -83,7 +83,7 @@ function RegisterNewUser({ toggleModal, onRegister }) {
         <input
           id="password"
           type="password"
-          placeholder="Lösnord"
+          placeholder="Lösenord"
           value={password}
           onChange={(p) => setPassword(p.target.value)}
         />
