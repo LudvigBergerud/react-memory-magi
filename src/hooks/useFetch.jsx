@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect } from "react";
 import { useState, useContext } from "react";
 import useLocalStorage from "./useLocalStorage";
 import { AuthContext } from "../contexts/AuthProvider";
@@ -18,32 +18,52 @@ function useFetch(url, obj, method) {
     };
     if (accessToken !== null) {
       headers["Authorization"] = `Bearer ${accessToken.accessToken}`;
+      console.log(`Using ${accessToken.accessToken} to make request...`);
     }
     const options = {
       method: method,
       headers: headers,
     };
     //Only add body to request if it's not a GET-request.
-    if (method !== "GET") {
+    if (method === "POST" || method === "PUT") {
       options.body = JSON.stringify(obj);
     }
     return options;
   }
 
+  async function createExternalOptions(obj, method) {
+    return { method: method, body: obj };
+  }
+
   async function checkToken() {
+    console.log("Checking token...");
     accessToken = await localStorageHandler.getLocalStorage("accessToken");
     //Check that the access token exists
     if (accessToken !== null) {
       const timeDiff = Date.now() / 1000 - accessToken.TimeStamp;
       //Check if the time difference is larger than the amount of seconds that the previous access token was valid for, with a margin of 60 seconds just to be sure.
       if (timeDiff > accessToken.expiresIn - 60) {
+        console.log(
+          `${timeDiff} is larger than ${
+            accessToken.expiresIn - 60
+          } so token has to be refreshed..`
+        );
+
         await refreshToken();
+      } else {
+        console.log(
+          `${timeDiff} is less than ${
+            accessToken.expiresIn - 60
+          } so token is still valid`
+        );
       }
     }
   }
 
   async function refreshToken() {
+    console.log("Refreshing token...");
     const refreshTokenObj = { refreshToken: accessToken.refreshToken };
+    console.log(`Old refresh token: ${accessToken.refreshToken}`);
     const options = await createOptions(refreshTokenObj, "POST");
     //Make call to refresh point with refresh token as parameter
     try {
@@ -53,6 +73,9 @@ function useFetch(url, obj, method) {
       );
       if (apiResponse.ok) {
         const data = await apiResponse.json();
+        console.log(`New refresh token: ${data.refreshToken}`);
+        console.log("Is new and old refresh token the same");
+        console.log(accessToken.refreshToken === data.refreshToken);
         accessToken = data;
         authHandler.signIn(data);
       } else {
@@ -66,16 +89,32 @@ function useFetch(url, obj, method) {
   }
 
   async function handleData(url, method, obj) {
+    let options = {};
+    setError(null);
+    setData(null);
+    setLoading(true);
     try {
-      await checkToken();
-      const options = await createOptions(obj, method);
-      setError(null);
-      setData(null);
-      setLoading(true);
+      if (url.includes("localhost")) {
+        await checkToken();
+        options = await createOptions(obj, method);
+      } else {
+        options = await createExternalOptions(obj, method);
+      }
       const apiResponse = await fetch(url, options);
       setResponse(apiResponse);
-      const data = await apiResponse.json();
-      setData(data);
+      if (apiResponse.ok) {
+        const contentType = apiResponse.headers.get("content-type");
+        if (contentType !== null) {
+          const data = await apiResponse.json();
+          setData(data);
+        } else {
+          setData({});
+        }
+      } else {
+        throw new Error(
+          `Request failed with status ${apiResponse.status} ${apiResponse.statusText}. Please contact support or try again later.`
+        );
+      }
     } catch (err) {
       setError(String(err));
     } finally {
