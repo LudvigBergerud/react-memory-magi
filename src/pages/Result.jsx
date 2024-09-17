@@ -54,7 +54,20 @@ function Result() {
 
   useEffect(() => {
     const postResult = async () => {
-      if (user && ResultData && !resultPosted && !resultBeingPosted) {
+      const postedResult = localStorage.getItem("PostedResult") === "true";
+      const data = JSON.parse(localStorage.getItem("latestResult"));
+      if (postedResult && data) {
+        setCurrentResult(data);
+      }
+
+      if (
+        user &&
+        ResultData &&
+        !resultPosted &&
+        !resultBeingPosted &&
+        !postedResult
+      ) {
+        console.log("test");
         setResultBeingPosted(true);
         const tokenObjectString = localStorage.getItem("accessToken");
         const tokenObject = tokenObjectString
@@ -86,7 +99,9 @@ function Result() {
                 ? await response.json()
                 : {};
             setCurrentResult(responseData);
+            localStorage.setItem("latestResult", JSON.stringify(responseData));
             setResultPosted(true);
+            localStorage.setItem("PostedResult", true);
           } else {
             setResultBeingPosted(false);
             console.error("Failed to post result", response.error);

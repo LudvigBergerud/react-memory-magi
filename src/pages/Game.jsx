@@ -122,7 +122,6 @@ function Game() {
 
       if (firstCard === secondCard) {
         console.log("Korten matchar");
-        setIsRunning(false);
 
         setTimeout(() => {
           setNewflipState({});
@@ -141,14 +140,13 @@ function Game() {
           setList([]);
         }, 2250);
       }
-
- 
     }
   }, [flippedcards]);
 
   const EndGame = () => {
+    localStorage.setItem("PostedResult", false);
     setIsRunning(false);
-      
+
     const hours = String(Math.floor((time / 3600000) % 24)).padStart(2, "0");
     const minutes = String(Math.floor((time / 60000) % 60)).padStart(2, "0");
     const seconds = String(Math.floor((time % 60000) / 1000)).padStart(2, "0");

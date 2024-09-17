@@ -79,10 +79,13 @@ function Profile() {
 
   const handleSubmitUpdateUser = async (e) => {
     e.preventDefault();
-    const accessTokenString = localStorage.getItem("accessToken");
-    const accessToken = accessTokenString
-      ? JSON.parse(accessTokenString)
+    const tokenObjectString = localStorage.getItem("accessToken");
+    const tokenObject = tokenObjectString
+      ? JSON.parse(tokenObjectString)
       : null;
+
+    // Access the actual string token from the object...
+    const accessToken = tokenObject?.accessToken;
 
     if (user != null) {
       const responseUpdate = await fetch(
@@ -117,10 +120,13 @@ function Profile() {
 
   const handleSubmitNewPassword = async (e) => {
     e.preventDefault();
-    const accessTokenString = localStorage.getItem("accessToken");
-    const accessToken = accessTokenString
-      ? JSON.parse(accessTokenString)
+    const tokenObjectString = localStorage.getItem("accessToken");
+    const tokenObject = tokenObjectString
+      ? JSON.parse(tokenObjectString)
       : null;
+
+    // Access the actual string token from the object...
+    const accessToken = tokenObject?.accessToken;
 
     if (newPassword !== confirmPassword) {
       alert("New password and confirm password do not match.");
@@ -128,7 +134,6 @@ function Profile() {
     }
 
     const updatePasswordModel = {
-      userId: user.userId,
       currentPassword: currentPassword,
       newPassword: newPassword,
     };
