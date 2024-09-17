@@ -30,7 +30,7 @@ function Game() {
 
   const handleFlip = (id, index) => {
     console.log("kortid-:" + id);
-
+    
     setList([...listOfFlippedCards, id]);
 
     //kolla hur många kort som är flippade
@@ -122,7 +122,6 @@ function Game() {
 
       if (firstCard === secondCard) {
         console.log("Korten matchar");
-        setIsRunning(false);
 
         setTimeout(() => {
           setNewflipState({});
