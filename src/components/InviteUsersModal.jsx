@@ -1,73 +1,74 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form, ListGroup } from "react-bootstrap";
-import useLocalStorage from "../hooks/useLocalStorage";
+import useFetch from "../hooks/useFetch";
 
-const InviteUsersModal = ({ show, handleClose, handleSaveInvites, currentInvitedUsers, showMessage }) => {
+const InviteUsersModal = ({
+  show,
+  handleClose,
+  handleSaveInvites,
+  currentInvitedUsers,
+  showMessage,
+}) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [users, setUsers] = useState([]);
   const [invitedUsers, setInvitedUsers] = useState(currentInvitedUsers || []);
   const [loggedInUserId, setLoggedInUserId] = useState(null);
-  const { getLocalStorage } = useLocalStorage();
+  const fetchUserHandler = useFetch();
+  const fetchAllUsersHandler = useFetch();
 
+  //Get signed in user
   useEffect(() => {
     if (show) {
-      fetchLoggedInUser();
-      setSearchTerm(""); 
+      fetchUserHandler.handleData(
+        "https://localhost:7259/api/users/user",
+        "GET"
+      );
+      setSearchTerm("");
     }
   }, [show]);
+
+  //Set signed in user, continue fetching all users if successful
+  useEffect(() => {
+    if (fetchUserHandler.data) {
+      setLoggedInUserId(fetchUserHandler.data.userId);
+      fetchAllUsersHandler.handleData(
+        "https://localhost:7259/api/users/users",
+        "GET"
+      );
+    }
+  }, [fetchUserHandler.data]);
+
+  //Handle error that might occur when fetching signed in user
+  useEffect(() => {
+    if (fetchUserHandler.error) {
+      showMessage(
+        `Fel vid hämtning av inloggad användare: ${fetchUserHandler.error}`
+      );
+    }
+  }, [fetchUserHandler.error]);
+
+  //Set filtered list of users after succesful fetch of all users
+  useEffect(() => {
+    if (fetchAllUsersHandler.data) {
+      const filteredUsers = fetchAllUsersHandler.data.filter(
+        (user) => user.userId !== loggedInUserId
+      );
+      setUsers(filteredUsers);
+    }
+  }, [fetchAllUsersHandler.data]);
+
+  //Handle error that might occur when fetching all users
+  useEffect(() => {
+    if (fetchAllUsersHandler.error) {
+      showMessage(
+        `Fel vid hämtning av användare: ${fetchAllUsersHandler.error}`
+      );
+    }
+  }, [fetchAllUsersHandler.error]);
 
   useEffect(() => {
     setInvitedUsers(currentInvitedUsers || []);
   }, [currentInvitedUsers]);
-
-  const fetchLoggedInUser = async () => {
-    const accessToken = await getLocalStorage("accessToken");
-
-    if (!accessToken || !accessToken.accessToken) {
-      showMessage("Access-token saknas eller är felaktigt.");
-      return;
-    }
-
-    try {
-      const response = await fetch("https://localhost:7259/api/users/user", {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken.accessToken}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Misslyckades med att hämta inloggad användare");
-      }
-
-      const userData = await response.json();
-      setLoggedInUserId(userData.userId);
-      fetchUsers(userData.userId);
-    } catch (error) {
-      showMessage(`Fel vid hämtning av inloggad användare: ${error.message}`);
-    }
-  };
-
-  const fetchUsers = async (loggedInUserId) => {
-    const accessToken = await getLocalStorage("accessToken");
-
-    try {
-      const response = await fetch("https://localhost:7259/api/users/users", {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken.accessToken}`,
-        },
-      });
-
-      const usersData = await response.json();
-      const filteredUsers = usersData.filter(
-        (user) => user.userId !== loggedInUserId
-      );
-      setUsers(filteredUsers);
-    } catch (error) {
-      showMessage(`Fel vid hämtning av användare: ${error.message}`);
-    }
-  };
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
@@ -78,8 +79,12 @@ const InviteUsersModal = ({ show, handleClose, handleSaveInvites, currentInvited
   );
 
   const toggleInviteUser = (user) => {
-    if (invitedUsers.some((invitedUser) => invitedUser.userId === user.userId)) {
-      setInvitedUsers(invitedUsers.filter((invitedUser) => invitedUser.userId !== user.userId));
+    if (
+      invitedUsers.some((invitedUser) => invitedUser.userId === user.userId)
+    ) {
+      setInvitedUsers(
+        invitedUsers.filter((invitedUser) => invitedUser.userId !== user.userId)
+      );
     } else {
       setInvitedUsers([...invitedUsers, user]);
     }
