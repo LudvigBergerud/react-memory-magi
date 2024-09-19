@@ -26,7 +26,6 @@ function App() {
         <Navbar></Navbar>
         <Routes>
           <Route path="/landingpage" element={<LandingPage />} />
-          <Route path="/" element={<Home />} />
           <Route
             path="/home"
             element={
@@ -35,6 +34,14 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          ></Route>
           <Route
             path="/game"
             element={
@@ -59,7 +66,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-           <Route
+          <Route
             path="/create"
             element={
               <ProtectedRoute>
