@@ -5,6 +5,7 @@ import ItemPopupModal from "../components/ItemPopupModal";
 import CategoryPopupModal from "../components/CategoryPopupModal";
 import InviteUsersModal from "../components/InviteUsersModal";
 import "../styles/Create.css";
+import useFetch from "../hooks/useFetch";
 
 function Create() {
   const [categories, setCategories] = useState([]);
@@ -12,16 +13,20 @@ function Create() {
   const [difficultyLevels, setDifficultyLevels] = useState([]);
   const [selectedDifficultyLevel, setSelectedDifficultyLevel] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [gameType, setGameType] = useState(""); 
+  const [gameType, setGameType] = useState("");
   const [gameName, setGameName] = useState("");
   const [cards, setCards] = useState([]);
-  const [invitedUsers, setInvitedUsers] = useState([]); 
+  const [invitedUsers, setInvitedUsers] = useState([]);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [showInviteModal, setShowInviteModal] = useState(false); 
+  const [showInviteModal, setShowInviteModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
+  const fetchDifficultyHandler = useFetch();
+  const fetchCategoryHandler = useFetch();
+  const fetchGamesHandler = useFetch();
+  const postGameHandler = useFetch();
 
   const navigate = useNavigate();
 
@@ -41,82 +46,79 @@ function Create() {
     setMessage("");
   };
 
-  const fetchCategoriesAndGames = useCallback(async () => {
-    const accessTokenString = localStorage.getItem("accessToken");
-    const accessTokenData = accessTokenString
-      ? JSON.parse(accessTokenString)
-      : null;
-    const accessToken = accessTokenData ? accessTokenData.accessToken : null;
+  //Fetch difficulty levels, categories and games on render.
+  useEffect(() => {
+    fetchDifficultyHandler.handleData(
+      "https://localhost:7259/api/difficultylevel/GetAllDifficultyLevels",
+      "GET"
+    );
 
-    if (!accessToken) {
-      setError("Ingen giltig access token hittades. Vänligen logga in igen.");
-      navigate("/landingpage");
-      return;
+    fetchCategoryHandler.handleData(
+      "https://localhost:7259/api/category/GetCategories",
+      "GET"
+    );
+
+    fetchGamesHandler.handleData(
+      "https://localhost:7259/api/Game/GetAllGames",
+      "GET"
+    );
+  }, []);
+
+  //Set data from fetches when it's available
+  useEffect(() => {
+    if (fetchDifficultyHandler.data) {
+      setDifficultyLevels(fetchDifficultyHandler.data);
     }
-
-    try {
-      const categoriesResponse = await fetch(
-        "https://localhost:7259/api/category/GetCategories",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-
-      if (!categoriesResponse.ok)
-        throw new Error("Failed to fetch categories.");
-
-      const categoriesData = await categoriesResponse.json();
-      setCategories(categoriesData || []);
-
-      const gamesResponse = await fetch(
-        "https://localhost:7259/api/game/GetAllGames",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-
-      if (!gamesResponse.ok) throw new Error("Failed to fetch games.");
-      const gamesData = await gamesResponse.json();
-      setGames(gamesData);
-    } catch (error) {
-      handleShowError(`Fel vid hämtning av data: ${error.message}`);
-    }
-  }, [navigate]);
+  }, [fetchDifficultyHandler.data]);
 
   useEffect(() => {
-    fetchCategoriesAndGames();
+    if (fetchCategoryHandler.data) {
+      setCategories(fetchCategoryHandler.data);
+    }
+  }, [fetchCategoryHandler.data]);
 
-    const accessTokenString = localStorage.getItem("accessToken");
-    const accessTokenData = accessTokenString
-      ? JSON.parse(accessTokenString)
-      : null;
-    const accessToken = accessTokenData ? accessTokenData.accessToken : null;
+  useEffect(() => {
+    if (fetchGamesHandler.data) {
+      setGames(fetchGamesHandler.data);
+    }
+  }, [fetchGamesHandler.data]);
+  useEffect(() => {
+    if (postGameHandler.data !== null) {
+      handleShowMessage("Spelet skapades!");
+      setTimeout(() => {
+        navigate("/Home");
+      }, 3000);
+    }
+  }, [postGameHandler.data]);
 
-    fetch("https://localhost:7259/api/difficultylevel/GetAllDifficultyLevels", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setDifficultyLevels(data || []);
-      })
-      .catch((error) =>
-        handleShowError(
-          `Fel vid hämtning av svårighetsgrader: ${error.message}`
-        )
+  //Handle errors that might occur during fetching and posting
+  useEffect(() => {
+    if (fetchDifficultyHandler.error) {
+      handleShowError(
+        `Fel vid hämtning av svårighetsgrader: ${fetchDifficultyHandler.error}`
       );
-  }, [fetchCategoriesAndGames]);
+    }
+  }, [fetchDifficultyHandler.error]);
+
+  useEffect(() => {
+    if (fetchCategoryHandler.error) {
+      handleShowError(
+        `Fel vid hämtning av kategorier: ${fetchCategoryHandler.error}`
+      );
+    }
+  }, [fetchCategoryHandler.error]);
+
+  useEffect(() => {
+    if (fetchGamesHandler.error) {
+      handleShowError(`Fel vid hämtning av spel: ${fetchGamesHandler.error}`);
+    }
+  }, [fetchGamesHandler.error]);
+
+  useEffect(() => {
+    if (postGameHandler.error) {
+      handleShowError(`Fel vid skapande av spel: ${postGameHandler.error}`);
+    }
+  }, [postGameHandler.error]);
 
   const isDuplicateCard = (newCard) => {
     return cards.some(
@@ -141,8 +143,12 @@ function Create() {
       handleShowError("Kategorinamn måste anges.");
       return;
     }
-
-    fetchCategoriesAndGames();
+    //Create copy of categories list
+    const categoriesCopy = [...categories];
+    //Add new category to categoriesCopy
+    categoriesCopy.push(newCategory);
+    //Set categories
+    setCategories(categoriesCopy);
     setShowCategoryModal(false);
   };
 
@@ -227,47 +233,14 @@ function Create() {
       allowedUsers:
         gameType === "private"
           ? invitedUsers.map((user) => ({ userId: user.userId }))
-          : [], 
+          : [],
     };
 
-    const accessTokenString = localStorage.getItem("accessToken");
-    const accessTokenData = accessTokenString
-      ? JSON.parse(accessTokenString)
-      : null;
-    const accessToken = accessTokenData ? accessTokenData.accessToken : null;
-
-    if (!accessToken) {
-      handleShowError(
-        "Ingen giltig access token hittades. Vänligen logga in igen."
-      );
-      navigate("/landingpage");
-      return;
-    }
-
-    try {
-      const response = await fetch("https://localhost:7259/api/game/PostGame", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(gameData),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        handleShowError(`Fel vid skapande av spel: ${errorText}`);
-        return;
-      }
-
-      handleShowMessage("Spelet skapades!");
-
-      setTimeout(() => {
-        navigate("/Home");
-      }, 3000);
-    } catch (error) {
-      handleShowError(`Fel vid skapande av spel: ${error.message}`);
-    }
+    postGameHandler.handleData(
+      "https://localhost:7259/api/game/PostGame",
+      "POST",
+      gameData
+    );
   };
 
   const openModal = () => setShowModal(true);
@@ -290,10 +263,7 @@ function Create() {
             Bjud in användare
           </button>
         )}
-        <button
-          onClick={openCategoryModal}
-          className="create-secondary-button"
-        >
+        <button onClick={openCategoryModal} className="create-secondary-button">
           Skapa ny kategori
         </button>
       </div>
@@ -312,11 +282,7 @@ function Create() {
 
         <div className="create-form-group">
           <label>Speltyp:</label>
-          <select
-            value={gameType}
-            onChange={handleGameTypeChange}
-            required
-          >
+          <select value={gameType} onChange={handleGameTypeChange} required>
             <option value="">Välj Speltyp</option>
             <option value="public">Offentligt</option>
             <option value="private">Privat</option>
