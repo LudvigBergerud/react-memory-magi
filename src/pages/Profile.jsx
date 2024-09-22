@@ -20,7 +20,10 @@ function Profile() {
 
   const fetchUserHandler = useFetch();
   const fetchAchievementHandler = useFetch();
+  const updateUserInfoHandler = useFetch();
+  const updatePasswordHandler = useFetch();
 
+  //Get user on render
   useEffect(() => {
     const fetchUser = async () => {
       await fetchUserHandler.handleData(
@@ -31,26 +34,70 @@ function Profile() {
     fetchUser();
   }, []);
 
+  //Get achievements on render
   useEffect(() => {
-    if (fetchUserHandler.data) {
-      setUser(fetchUserHandler.data);
-      setEmail(fetchUserHandler.data.email);
-      setUserName(fetchUserHandler.data.userName);
-    } else {
-      console.log("Error fetching user: ", fetchUserHandler.error);
-      setUser(null);
-    }
-  }, [fetchUserHandler.data]);
-
-  useEffect(() => {
-    const fetchUser = async () => {
+    const fetchAchievements = async () => {
       await fetchAchievementHandler.handleData(
         "https://localhost:7259/api/Achievement/GetAllAchievements",
         "GET"
       );
     };
-    fetchUser();
+    fetchAchievements();
   }, []);
+
+  //Evaluate response from update username/email request
+  useEffect(() => {
+    if (updateUserInfoHandler.response.status === 200) {
+      alert("Användarnamn/e-post har blivit uppdaterat.");
+    }
+  }, [updateUserInfoHandler.response]);
+
+  //Evaluate response from update password request
+  useEffect(() => {
+    if (updatePasswordHandler.response.status === 200) {
+      alert("Lösenordet har blivit uppdaterat.");
+    }
+  }, [updatePasswordHandler.response]);
+
+  //Set userinformation after succesful fetch
+  useEffect(() => {
+    if (fetchUserHandler.data) {
+      setUser(fetchUserHandler.data);
+      setEmail(fetchUserHandler.data.email);
+      setUserName(fetchUserHandler.data.userName);
+    }
+  }, [fetchUserHandler.data]);
+
+  //Handle error that occurred during user fetch
+  useEffect(() => {
+    if (fetchUserHandler.error) {
+      console.log("Error fetching user: ", fetchUserHandler.error);
+    }
+  }, [fetchUserHandler.error]);
+
+  //Handle error that occurred during achievements fetch
+  useEffect(() => {
+    if (fetchAchievementHandler.error) {
+      console.log(
+        "Error fetching achievements: ",
+        fetchAchievementHandler.error
+      );
+    }
+  }, [fetchAchievementHandler.error]);
+
+  //Handle error that occured during update password
+  useEffect(() => {
+    if (updatePasswordHandler.error) {
+      console.error("Update password  failed:", updatePasswordHandler.error);
+    }
+  }, [updatePasswordHandler.error]);
+
+  //Handle error that occured during username/email update
+  useEffect(() => {
+    if (updateUserInfoHandler.error) {
+      console.error("Update username failed:", updateUserInfoHandler.error);
+    }
+  }, [updateUserInfoHandler.error]);
 
   useEffect(() => {
     if (user) {
@@ -71,7 +118,10 @@ function Profile() {
           )
         );
       } else {
-        console.log("Error fetching user: ", fetchAchievementHandler.error);
+        console.log(
+          "Error fetching achievements: ",
+          fetchAchievementHandler.error
+        );
         setUser(null);
       }
     }
@@ -79,40 +129,12 @@ function Profile() {
 
   const handleSubmitUpdateUser = async (e) => {
     e.preventDefault();
-    const tokenObjectString = localStorage.getItem("accessToken");
-    const tokenObject = tokenObjectString
-      ? JSON.parse(tokenObjectString)
-      : null;
-
-    // Access the actual string token from the object...
-    const accessToken = tokenObject?.accessToken;
-
-    if (user != null) {
-      const responseUpdate = await fetch(
+    if (user) {
+      updateUserInfoHandler.handleData(
         "https://localhost:7259/api/Users/update-user",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
-          },
-          body: JSON.stringify({
-            userId: user.userId,
-            userName: userName,
-            email: email,
-          }),
-        }
+        "PUT",
+        { userId: user.userId, userName: userName, email: email }
       );
-      if (responseUpdate.ok) {
-        alert("Profile updated successfully.");
-        console.log("Profile updated successfully.");
-      } else {
-        const error =
-          responseUpdate.headers.get("Content-Length") !== "0"
-            ? await responseUpdate.json()
-            : {};
-        console.error("Update username failed:", JSON.stringify(error));
-      }
     } else {
       console.error("No user found when updating information");
     }
@@ -120,51 +142,21 @@ function Profile() {
 
   const handleSubmitNewPassword = async (e) => {
     e.preventDefault();
-    const tokenObjectString = localStorage.getItem("accessToken");
-    const tokenObject = tokenObjectString
-      ? JSON.parse(tokenObjectString)
-      : null;
-
-    // Access the actual string token from the object...
-    const accessToken = tokenObject?.accessToken;
 
     if (newPassword !== confirmPassword) {
       alert("New password and confirm password do not match.");
       return;
     }
-
     const updatePasswordModel = {
       currentPassword: currentPassword,
       newPassword: newPassword,
     };
 
-    try {
-      const response = await fetch(
-        "https://localhost:7259/api/Users/update-password",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
-          },
-          body: JSON.stringify(updatePasswordModel),
-        }
-      );
-
-      if (response.ok) {
-        alert("Password updated successfully.");
-        // Reset the form fields
-        setCurrentPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
-      } else {
-        const errorData = await response.json();
-        alert(`Failed to update password: ${JSON.stringify(errorData)}`);
-      }
-    } catch (error) {
-      console.error("Error updating password:", error);
-      alert("An error occurred while updating the password.");
-    }
+    updatePasswordHandler.handleData(
+      "https://localhost:7259/api/Users/update-password",
+      "PUT",
+      updatePasswordModel
+    );
   };
 
   const handleMouseEnter = (id, e) => {

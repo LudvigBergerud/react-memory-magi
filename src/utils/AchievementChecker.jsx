@@ -212,7 +212,7 @@ export const fetchAllResults = async (result) => {
   const accessToken = tokenObject?.accessToken;
 
   const response = await fetch(
-    `https://localhost:7259/api/Result/GetAllResultsWithIncludedData?currentResultId=${result.id}`,
+    `https://localhost:7259/api/Result/GetUserResultsForAllGames`,
     {
       method: "GET",
       headers: {

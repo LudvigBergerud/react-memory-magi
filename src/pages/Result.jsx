@@ -6,6 +6,7 @@ import star from "../assets/Mario-Star.png";
 import useFetch from "../hooks/useFetch";
 import AchievementModal from "../components/AchievementModal";
 import achievementImages from "../utils/AchievementImages";
+import useLocalStorage from "../hooks/useLocalStorage";
 
 function Result() {
   const location = useLocation();
@@ -26,13 +27,19 @@ function Result() {
   const [resultPosted, setResultPosted] = useState(false);
   const [resultBeingPosted, setResultBeingPosted] = useState(false);
 
+  const localStorageHandler = useLocalStorage();
+
   const fetchUserHandler = useFetch();
+  const postResultHandler = useFetch();
+  const getAllResultsHandler = useFetch();
 
   useEffect(() => {
     if (ResultData) {
       setTime(ResultData.time);
     }
   }, [ResultData]);
+
+  //Fetch current user upon render
   useEffect(() => {
     const fetchUser = async () => {
       await fetchUserHandler.handleData(
@@ -43,19 +50,74 @@ function Result() {
     fetchUser();
   }, []);
 
+  //Set user after fetch has completed
   useEffect(() => {
     if (fetchUserHandler.data) {
       setUser(fetchUserHandler.data);
-    } else {
-      console.log("Error fetching user: ", fetchUserHandler.error);
-      setUser(null);
     }
   }, [fetchUserHandler.data]);
 
+  //Handle error on fetching user
+  useEffect(() => {
+    if (fetchUserHandler.error) {
+      console.error(`Error fetching current user ${fetchUserHandler.error}`);
+    }
+  }, [fetchUserHandler.error]);
+
+  //Set data and local storage upon successful posting of result
+  useEffect(() => {
+    const handleResultPost = async () => {
+      if (postResultHandler.data) {
+        setCurrentResult(postResultHandler.data);
+        await localStorageHandler.setLocalStorage(
+          "latestResult",
+          postResultHandler.data
+        );
+        setResultPosted(true);
+        await localStorageHandler.setLocalStorage("PostedResult", true);
+        setResultBeingPosted(false);
+      }
+    };
+    handleResultPost();
+  }, [postResultHandler.data]);
+
+  //Handle error upon posting result
+  useEffect(() => {
+    if (postResultHandler.error) {
+      console.error("Failed to post result", postResultHandler.error);
+      setResultBeingPosted(false);
+    }
+  }, [postResultHandler.error]);
+
+  //Set data and leaderboard after successful fetch of results
+  useEffect(() => {
+    if (getAllResultsHandler.data) {
+      const userIds = new Set();
+      const sortedResults = [];
+      getAllResultsHandler.data.forEach((result) => {
+        if (!userIds.has(result.userId)) {
+          userIds.add(result.userId);
+          sortedResults.push(result);
+        }
+      });
+
+      setResultData(getAllResultsHandler.data);
+      setSortedLeaderboard(sortedResults);
+    }
+  }, [getAllResultsHandler.data]);
+
+  //Handle error upon fetching all results
+  useEffect(() => {
+    if (getAllResultsHandler.error) {
+      console.error("Failed to get all results: ", getAllResultsHandler.error);
+    }
+  }, [getAllResultsHandler.error]);
+
   useEffect(() => {
     const postResult = async () => {
-      const postedResult = localStorage.getItem("PostedResult") === "true";
-      const data = JSON.parse(localStorage.getItem("latestResult"));
+      const postedResult =
+        (await localStorageHandler.getLocalStorage("PostedResult")) === true;
+      const data = await localStorageHandler.getLocalStorage("latestResult");
       if (postedResult && data) {
         setCurrentResult(data);
       }
@@ -69,47 +131,17 @@ function Result() {
       ) {
         console.log("test");
         setResultBeingPosted(true);
-        const tokenObjectString = localStorage.getItem("accessToken");
-        const tokenObject = tokenObjectString
-          ? JSON.parse(tokenObjectString)
-          : null;
 
-        // Access the actual string token from the object...
-        const accessToken = tokenObject?.accessToken;
-        try {
-          const response = await fetch(
-            "https://localhost:7259/api/Result/Result",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${accessToken}`,
-              },
-              body: JSON.stringify({
-                gameId: ResultData.gameId,
-                userId: user.userId,
-                time: ResultData.time,
-                passed: true,
-              }),
-            }
-          );
-          if (response.ok) {
-            const responseData =
-              (await response.headers.get("Content-Length")) !== "0"
-                ? await response.json()
-                : {};
-            setCurrentResult(responseData);
-            localStorage.setItem("latestResult", JSON.stringify(responseData));
-            setResultPosted(true);
-            localStorage.setItem("PostedResult", true);
-          } else {
-            setResultBeingPosted(false);
-            console.error("Failed to post result", response.error);
+        postResultHandler.handleData(
+          "https://localhost:7259/api/Result/Result",
+          "POST",
+          {
+            gameId: ResultData.gameId,
+            userId: user.userId,
+            time: ResultData.time,
+            passed: true,
           }
-        } catch (error) {
-          console.error("Error posting result: ", error);
-        }
-        setResultBeingPosted(false);
+        );
       }
     };
     postResult();
@@ -119,47 +151,11 @@ function Result() {
     const fetchData = async () => {
       if (currentResult) {
         console.log("Current:", currentResult);
-        // Retrieve the stored token object from localStorage
-        const tokenObjectString = localStorage.getItem("accessToken");
-        const tokenObject = tokenObjectString
-          ? JSON.parse(tokenObjectString)
-          : null;
 
-        // Access the actual string token from the object...
-        const accessToken = tokenObject?.accessToken;
-
-        const response = await fetch(
+        getAllResultsHandler.handleData(
           `https://localhost:7259/api/Result/GetAllResultsWithIncludedData?currentResultId=${currentResult.id}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
+          "GET"
         );
-
-        if (response.ok) {
-          const responseData =
-            (await response.headers.get("Content-Length")) !== "0"
-              ? await response.json()
-              : {};
-
-          const userIds = new Set();
-          const sortedResults = [];
-
-          responseData.forEach((result) => {
-            if (!userIds.has(result.userId)) {
-              userIds.add(result.userId);
-              sortedResults.push(result);
-            }
-          });
-
-          await setResultData(responseData);
-          setSortedLeaderboard(sortedResults);
-        } else {
-          console.error("Failed to get all results: ", response.error);
-        }
       }
     };
 
